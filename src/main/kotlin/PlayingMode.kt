@@ -1,0 +1,1 @@
+enum class PlayingMode { TWO_PLAYERS }
