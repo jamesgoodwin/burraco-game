@@ -1,24 +1,27 @@
-data class PlayingCard(val value: Value, val suite: Suite? = null) : Comparable<PlayingCard> {
+data class PlayingCard(val value: Value, val suit: Suit? = null) : Comparable<PlayingCard> {
 
-    enum class Suite(val symbol: Char) {
-        HEARTS('♥'), DIAMONDS('♦'), CLUB('♣'), SPADES('♠')
+    enum class Suit(val symbol: Char, val binaryValue: Int) {
+        HEART('♥', 1),
+        DIAMOND('♦', 2),
+        CLUB('♣', 4),
+        SPADE('♠', 8)
     }
 
-    enum class Value(numericValue: Int) {
-        JOKER(0),
-        ACE(1),
-        TWO(2),
-        THREE(3),
-        FOUR(4),
-        FIVE(5),
-        SIX(6),
-        SEVEN(7),
-        EIGHT(8),
-        NINE(9),
-        TEN(10),
-        JACK(11),
-        QUEEN(12),
-        KING(13);
+    enum class Value(val symbol: String, val binaryValue: Int) {
+        TWO("2", 1),
+        THREE("3", 2),
+        FOUR("4", 4),
+        FIVE("5", 8),
+        SIX("6", 16),
+        SEVEN("7", 32),
+        EIGHT("8", 64),
+        NINE("9", 128),
+        TEN("10", 256),
+        JACK("J", 512),
+        QUEEN("Q", 1024),
+        KING("K", 2048),
+        ACE("A", 4096),
+        JOKER("*", 8192);
     }
 
     override fun compareTo(other: PlayingCard): Int {

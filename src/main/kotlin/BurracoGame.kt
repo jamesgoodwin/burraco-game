@@ -1,11 +1,12 @@
+import PlayingCard.Value.JOKER
 import java.lang.RuntimeException
 import java.lang.UnsupportedOperationException
 import kotlin.collections.ArrayDeque
 import kotlin.collections.ArrayList
 
-class BurracoGame(playingMode: PlayingMode, val state: State = State()) {
+class BurracoGame(val state: State = State()) {
 
-    private val meldValidator = MeldValidator()
+    private val meldValidator = SlowMeldValidator()
 
     init {
         deal()
@@ -16,7 +17,7 @@ class BurracoGame(playingMode: PlayingMode, val state: State = State()) {
         dealCards()
     }
 
-    fun discard(player: Player, cards: PlayingCard) {
+    fun discard(player: HumanPlayer, cards: PlayingCard) {
         checkPlayersTurnAndTakenCards(player)
 
         state.discard.add(cards)
@@ -24,50 +25,58 @@ class BurracoGame(playingMode: PlayingMode, val state: State = State()) {
         nextPlayer()
     }
 
-    fun takeCard(player: Player) {
+    fun takeCard(player: HumanPlayer) {
         checkPlayersTurnAndNotTakenCards(player)
 
         state.playerTakenCards = true
         player.hand.add(state.stock.removeFirst())
     }
 
-    fun meld(player: Player, meld: List<PlayingCard>) {
+    fun meld(player: HumanPlayer, cards: List<PlayingCard>, index: Int?) {
         checkPlayersTurnAndTakenCards(player)
 
-        if(meldValidator.isValidMeld(meld)) {
-            player.melds.add(meld.toMutableList())
-            player.hand.removeAll(meld)
+        val cardsToMeld = if (index != null && index < player.melds.size) {
+            player.melds[index] + cards
+        } else {
+            cards
+        }
+
+        if (meldValidator.isValidMeld(cardsToMeld)) {
+            player.melds.add(cardsToMeld.toMutableList())
+            player.hand.removeAll(cardsToMeld)
         }
     }
 
-    private fun checkPlayersTurnAndTakenCards(player: Player) {
+    private fun checkPlayersTurnAndTakenCards(player: HumanPlayer) {
         checkPlayersTurn(player)
         if (!state.playerTakenCards)
             throw UnsupportedOperationException("Must take a card before discarding!")
     }
 
-    private fun checkPlayersTurnAndNotTakenCards(player: Player) {
+    private fun checkPlayersTurnAndNotTakenCards(player: HumanPlayer) {
         checkPlayersTurn(player)
         if (state.playerTakenCards)
             throw UnsupportedOperationException("Already taken a card!")
     }
 
-    private fun checkPlayersTurn(player: Player) {
+    private fun checkPlayersTurn(player: HumanPlayer) {
         if (state.playersTurn != player)
             throw UnsupportedOperationException("Not your turn!")
     }
 
     private fun dealCards() {
         var cards = ArrayList<PlayingCard>()
-        for (suite in PlayingCard.Suite.values()) {
-            cards.add(PlayingCard(PlayingCard.Value.JOKER))
+
+        for (suite in PlayingCard.Suit.values()) {
+            cards.add(PlayingCard(JOKER))
             for (value in PlayingCard.Value.values()) {
-                if (value == PlayingCard.Value.JOKER) continue
+                if (value == JOKER) continue
                 repeat(2) {
                     cards.add(PlayingCard(value, suite))
                 }
             }
         }
+
         cards.shuffle()
         repeat(2) {
             val pot = ArrayList<PlayingCard>(cards.take(11))

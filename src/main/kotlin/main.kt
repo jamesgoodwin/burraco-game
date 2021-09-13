@@ -1,5 +1,4 @@
 fun main(args: Array<String>) {
-    val game = BurracoGame(PlayingMode.TWO_PLAYERS)
+    val game = BurracoGame()
     game.deal()
 }
-

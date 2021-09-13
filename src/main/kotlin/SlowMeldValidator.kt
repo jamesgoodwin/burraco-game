@@ -1,8 +1,19 @@
 import PlayingCard.*
+import kotlin.system.measureTimeMillis
 
-class MeldValidator {
+class SlowMeldValidator {
 
     fun isValidMeld(meld: List<PlayingCard>): Boolean {
+        val valid : Boolean
+        val timeInMillis = measureTimeMillis {
+            valid = isValid(meld)
+        }
+        println("(The operation took $timeInMillis ms)")
+
+        return valid
+    }
+
+    private fun isValid(meld: List<PlayingCard>): Boolean {
         if (meld.size < 3 || meld.size > 14) {
             return false
         }
@@ -11,48 +22,25 @@ class MeldValidator {
         val aces = mutableListOf<PlayingCard>()
         val regularCards = mutableListOf<PlayingCard>()
 
-        var sameSuite = true
-        var sameValue = true
-        var suite: Suite? = null
-        var value: Value? = null
-
         for (card in meld) {
             when (card.value) {
                 Value.ACE -> aces.add(card)
                 Value.TWO -> wildcards.add(card)
                 Value.JOKER -> wildcards.add(card)
-                else -> {
-                    regularCards.add(card)
-                    if (suite == null) suite = card.suite
-                    if (value == null) value = card.value
-
-                    if (suite != card.suite) {
-                        sameSuite = false
-                    }
-                    if (value != card.value) {
-                        sameValue = false
-                    }
-                    if (!sameSuite && !sameValue) {
-                        break
-                    }
-                }
+                else -> regularCards.add(card)
             }
         }
 
+        val sameSuite = regularCards.zipWithNext { a, b -> a.suit == b.suit }.all { it }
+
         return if (sameSuite) {
-            validateSameSuite(regularCards, aces, wildcards, suite, meld)
+            validateSameSuite(regularCards, aces, wildcards, meld)
         } else {
-            validateSameValue(regularCards, aces, wildcards, suite, meld)
+            validateSameValue(regularCards)
         }
     }
 
-    private fun validateSameValue(
-        regularCards: MutableList<PlayingCard>,
-        aces: MutableList<PlayingCard>,
-        wildcards: MutableList<PlayingCard>,
-        suite: Suite?,
-        meld: List<PlayingCard>
-    ): Boolean {
+    private fun validateSameValue(regularCards: MutableList<PlayingCard>): Boolean {
         return regularCards.zipWithNext { a, b -> a.value == b.value }.all { it }
     }
 
@@ -60,7 +48,6 @@ class MeldValidator {
         regularCards: MutableList<PlayingCard>,
         aces: MutableList<PlayingCard>,
         wildcards: MutableList<PlayingCard>,
-        suite: Suite?,
         meld: List<PlayingCard>
     ): Boolean {
         val suiteArray = arrayOfNulls<PlayingCard>(14)
@@ -71,10 +58,10 @@ class MeldValidator {
             if (!suiteArray.contains(card)) {
                 suiteArray[card.value.ordinal - 1] = card
 
-                if (minIndex == -1 || card.value.ordinal < minIndex) {
+                if (minIndex == -1 || card.value.ordinal - 1 < minIndex) {
                     minIndex = card.value.ordinal - 1
                 }
-                if (maxIndex == -1 || card.value.ordinal > maxIndex) {
+                if (maxIndex == -1 || card.value.ordinal - 1 > maxIndex) {
                     maxIndex = card.value.ordinal - 1
                 }
             }
@@ -105,9 +92,10 @@ class MeldValidator {
             }
 
             if (wildcards.size == 2) { // 2 must be used as a 2 instead of a wildcard
-                if (wildcards.contains(PlayingCard(Value.TWO, suite))) {
-                    suiteArray[1] = PlayingCard(Value.TWO, suite)
-                    wildcards.remove(PlayingCard(Value.TWO, suite))
+                if (wildcards.count { it.value == Value.TWO } > 0) {
+                    val two = wildcards.first { it.value == Value.TWO }
+                    suiteArray[1] = two
+                    wildcards.remove(two)
                     if (1 < minIndex) {
                         minIndex = 1
                     }
