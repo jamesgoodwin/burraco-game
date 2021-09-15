@@ -1,13 +1,13 @@
 import PlayingCard.Value.JOKER
 import PlayingCard.Value.TWO
 
-class FastMeldValidator {
+class FastMeldValidator : MeldValidator {
 
     private val cardValues: List<Float> = PlayingCard.Value.values().map { it.binaryValue.toFloat() }
     private val suitValues: List<Float> = PlayingCard.Suit.values().map { it.binaryValue.toFloat() }
 
     // 1. evaluate if a meld is valid or not, sequence or combination
-    fun isValid(playingCards: List<PlayingCard>): Boolean {
+    override fun isValid(playingCards: List<PlayingCard>): Boolean {
         if (playingCards.size < 3 || playingCards.size > 14) {
             return false
         }
@@ -20,9 +20,8 @@ class FastMeldValidator {
         val avgSuitMinusJoker = sumSuits.toFloat() / (playingCards.size.toFloat() - 1)
         val avgValue = sumValues.toFloat() / playingCards.size.toFloat()
 
-        if ((avgSuit in suitValues
-                    || avgSuitMinusTwo in suitValues
-                    || avgSuitMinusJoker in suitValues) && avgValue !in cardValues
+        if (suitValues.any { it == avgSuit || it == avgSuitMinusTwo || it == avgSuitMinusJoker }
+            && avgValue !in cardValues
         ) {
             // validate sequence
             val lsb = sumValues.takeLowestOneBit()
@@ -46,18 +45,16 @@ class FastMeldValidator {
                     return true
                 }
             }
-            if (binaryZeros((sumValues - JOKER.binaryValue) / sumValues.takeLowestOneBit()) <= 1) {
+            if (sumValues.takeHighestOneBit() == JOKER.binaryValue
+                && binaryZeros((sumValues - JOKER.binaryValue) / sumValues.takeLowestOneBit()) <= 1
+            ) {
                 return true
             }
         } else {
-            for (value in PlayingCard.Value.values()) {
-                // check for clean meld
-                if (avgValue == value.binaryValue.toFloat()) {
-                    return when (value) {
-                        TWO, JOKER -> false
-                        else -> true
-                    }
-                }
+            if (avgValue == TWO.binaryValue.toFloat() || avgValue == JOKER.binaryValue.toFloat()) {
+                return false
+            } else if (avgValue in cardValues) {
+                return true
             }
         }
 

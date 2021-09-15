@@ -24,8 +24,15 @@ data class PlayingCard(val value: Value, val suit: Suit? = null) : Comparable<Pl
         JOKER("*", 8192);
     }
 
+    override fun toString(): String {
+        if(value == Value.JOKER) {
+            return "Joker"
+        }
+        return "${value.symbol}${suit?.symbol}"
+    }
+
     override fun compareTo(other: PlayingCard): Int {
-        return compareValues(this.value, other.value)
+        return compareBy<PlayingCard>({ it.suit }, { it.value }).compare(this, other)
     }
 
 }

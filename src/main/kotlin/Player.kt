@@ -1,3 +1,3 @@
 interface Player {
-    fun takeTurn(turn: PlayerTurn)
+    fun takeTurn(state: State, turn: PlayerTurn)
 }
