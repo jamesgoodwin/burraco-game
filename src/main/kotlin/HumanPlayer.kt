@@ -1,12 +1,17 @@
-class HumanPlayer(val name: String) : Player {
-
-    //todo - remove constructor args
+class HumanPlayer(private val name: String) : Player {
 
     override fun takeTurn(state: State, turn: PlayerTurn) {
         println("--- Player ($name) turn ---")
 
         printGameState(state)
 
+        takeCardInput(turn)
+
+        printGameState(state)
+        placeCardInput(state, turn)
+    }
+
+    private fun takeCardInput(turn: PlayerTurn) {
         println("Please choose an option:")
         println("1. to pick up from deck\n2. to pick up from pile")
 
@@ -14,12 +19,12 @@ class HumanPlayer(val name: String) : Player {
             when (it) {
                 "1" -> turn.takeCard()
                 "2" -> turn.takePile()
-                else -> print("Unexpected input!")
+                else -> {
+                    println("Error!")
+                    takeCardInput(turn)
+                }
             }
         }
-
-        printGameState(state)
-        placeCardInput(state, turn)
     }
 
     private fun printGameState(state: State) {

@@ -6,6 +6,9 @@ import kotlin.test.assertFalse
 
 internal class StateBasedPlayerTurnTest {
 
+    val player1 = HumanPlayer("player 1")
+    val player2 = HumanPlayer("player 2")
+
     @Test
     fun shouldBeAbleToTakeACardPlayerOne() {
 //        val game = BurracoGame()
@@ -14,9 +17,6 @@ internal class StateBasedPlayerTurnTest {
 //
 //        game.state.players[0].takeCard(game)
 
-
-        val player1 = HumanPlayer()
-        val player2 = HumanPlayer()
 
         val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
@@ -29,8 +29,7 @@ internal class StateBasedPlayerTurnTest {
 
     @Test
     fun shouldBeAbleToTakeACardAndDiscardACard() {
-        val player1 = HumanPlayer()
-        val state = State(listOf(player1, HumanPlayer()))
+        val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
@@ -46,8 +45,6 @@ internal class StateBasedPlayerTurnTest {
     @Test
     fun shouldBeAbleToTakeACardPLayer2AfterPlayer1DiscardsACard() {
         val meldValidator = FastMeldValidator()
-        val player1 = HumanPlayer()
-        val player2 = HumanPlayer()
 
         val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
@@ -65,12 +62,11 @@ internal class StateBasedPlayerTurnTest {
 
     @Test
     fun shouldNotBeAbleToTakeACardAfterDiscardingCard() {
-        val player1 = HumanPlayer()
-        val state = State(listOf(player1, HumanPlayer()))
+        val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
-        val taken = playerTurn.takeCard()
+        playerTurn.takeCard()
 
         state.hand(player1)?.get(0)?.let {
             playerTurn.discard(it)
@@ -81,8 +77,7 @@ internal class StateBasedPlayerTurnTest {
 
     @Test
     fun shouldNotBeAbleToTakeACardMoreThanOnce() {
-        val player1 = HumanPlayer()
-        val state = State(listOf(player1, HumanPlayer()))
+        val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
@@ -93,8 +88,7 @@ internal class StateBasedPlayerTurnTest {
 
     @Test
     fun shouldNotBeAbleToDiscardBeforeTaking() {
-        val player1 = HumanPlayer()
-        val state = State(listOf(player1, HumanPlayer()))
+        val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
@@ -103,8 +97,7 @@ internal class StateBasedPlayerTurnTest {
 
     @Test
     fun shouldNotBeAbleToDiscardMoreThanOnce() {
-        val player1 = HumanPlayer()
-        val state = State(listOf(player1, HumanPlayer()))
+        val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
@@ -116,8 +109,7 @@ internal class StateBasedPlayerTurnTest {
 
     @Test
     fun shouldBeAbleToPutDownNewMeld() {
-        val player1 = HumanPlayer()
-        val state = State(listOf(player1, HumanPlayer()))
+        val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
@@ -129,9 +121,7 @@ internal class StateBasedPlayerTurnTest {
 
     @Test
     fun shouldRemoveCardsFromHandWhenMeldPlayed() {
-        val player1 = HumanPlayer()
-
-        val state = State(listOf(player1, HumanPlayer()))
+        val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val cards = listOf(
@@ -151,9 +141,7 @@ internal class StateBasedPlayerTurnTest {
 
     @Test
     fun shouldBeAbleToAddCardToExistingMeld() {
-        val player1 = HumanPlayer()
-
-        val state = State(listOf(player1, HumanPlayer()))
+        val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val cards = listOf(

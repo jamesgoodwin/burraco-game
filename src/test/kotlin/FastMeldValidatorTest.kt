@@ -246,4 +246,45 @@ internal class FastMeldValidatorTest {
         assertTrue(meldValidator.isValid(meld))
     }
 
+    @Test
+    fun shouldBeAbleToMeldThreeCardsOfSameValue3() {
+        val meldValidator = FastMeldValidator()
+
+        val meld = listOf(
+            PlayingCard(TWO, HEART),
+            PlayingCard(TEN, CLUB),
+            PlayingCard(TEN, SPADE),
+        )
+        assertTrue(meldValidator.isValid(meld))
+    }
+
+    @Test
+    fun shouldBeAbleToMeldThreeCardsOfSameValue4() {
+        val meldValidator = FastMeldValidator()
+
+        val meld = listOf(
+            PlayingCard(JOKER),
+            PlayingCard(TEN, CLUB),
+            PlayingCard(TEN, SPADE),
+        )
+        assertTrue(meldValidator.isValid(meld))
+    }
+
+    @Test
+    fun shouldBeAbleToMeldSequenceWithTwo() {
+        val meldValidator = FastMeldValidator()
+
+        val meld = listOf(
+            PlayingCard(FOUR, CLUB),
+            PlayingCard(SIX, CLUB),
+            PlayingCard(SEVEN, CLUB),
+            PlayingCard(EIGHT, CLUB),
+            PlayingCard(TWO, SPADE),
+        )
+
+        // 4♣, 6♣, 7♣, 8♣, 2♠
+        assertTrue(meldValidator.isValid(meld))
+    }
+
+
 }

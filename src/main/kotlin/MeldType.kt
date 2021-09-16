@@ -1,1 +1,0 @@
-enum class MeldType { STRAIGHT, FLUSH }
