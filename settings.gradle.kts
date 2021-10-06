@@ -1,3 +1,3 @@
 
-rootProject.name = "KotlinScratch"
+rootProject.name = "burraco-engine"
 

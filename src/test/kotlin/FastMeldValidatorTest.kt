@@ -44,6 +44,33 @@ internal class FastMeldValidatorTest {
     }
 
     @Test
+    fun shouldBeAbleToMeldTwoAndJoker() {
+        val meldValidator = FastMeldValidator()
+
+        val meld = listOf(
+            PlayingCard(TWO, SPADE),
+            PlayingCard(JOKER),
+            PlayingCard(THREE, SPADE)
+        )
+
+        assertTrue(meldValidator.isValid(meld))
+    }
+
+    @Test
+    fun shouldNotBeAbleToMeldTwoAndTwoKings() {
+        val meldValidator = FastMeldValidator()
+
+        val meld = listOf(
+            PlayingCard(TWO, SPADE),
+            PlayingCard(KING, SPADE),
+            PlayingCard(KING, SPADE),
+            PlayingCard(THREE, SPADE)
+        )
+
+        assertFalse(meldValidator.isValid(meld))
+    }
+
+    @Test
     fun shouldNotBeAbleToMeldThreeWildcards() {
         val meldValidator = FastMeldValidator()
 

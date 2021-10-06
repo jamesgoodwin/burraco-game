@@ -3,7 +3,13 @@ import java.lang.RuntimeException
 import kotlin.collections.ArrayDeque
 import kotlin.collections.ArrayList
 
-class BurracoGame(var state: State = State(listOf(HumanPlayer("1"), HumanPlayer("2")))) {
+class BurracoGame(var state: State = State(
+    listOf(
+        HumanPlayer("1"),
+        LowAiPlayer(meldEvaluator = HandEvaluator(FastMeldValidator()))
+    )
+)
+) {
 
     init {
         dealCards()
@@ -11,6 +17,9 @@ class BurracoGame(var state: State = State(listOf(HumanPlayer("1"), HumanPlayer(
 
     fun runGame() {
         while (!state.finished) {
+            val name = state.playersTurn.name()
+            println("--- Player ($name) turn ---")
+            state.printGameState(state.playersTurn)
             state.playersTurn.takeTurn(state, StateBasedPlayerTurn(state, FastMeldValidator()))
             nextPlayer()
         }

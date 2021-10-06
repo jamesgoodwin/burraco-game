@@ -4,20 +4,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.test.assertFalse
 
-internal class StateBasedPlayerTurnTest {
+internal class PlayerTurnTest {
 
     val player1 = HumanPlayer("player 1")
     val player2 = HumanPlayer("player 2")
 
     @Test
     fun shouldBeAbleToTakeACardPlayerOne() {
-//        val game = BurracoGame()
-//        game.state.hand()
-//        assertTrue(game.state.players[0].hand.size == 11)
-//
-//        game.state.players[0].takeCard(game)
-
-
         val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
@@ -30,7 +23,9 @@ internal class StateBasedPlayerTurnTest {
     @Test
     fun shouldBeAbleToTakeACardAndDiscardACard() {
         val state = State(listOf(player1, player2))
-        state.stock.add(PlayingCard(ACE, SPADE))
+        val card = PlayingCard(ACE, SPADE)
+
+        state.stock.add(card)
 
         val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
         val taken = playerTurn.takeCard()
@@ -47,7 +42,7 @@ internal class StateBasedPlayerTurnTest {
         val meldValidator = FastMeldValidator()
 
         val state = State(listOf(player1, player2))
-        state.stock.add(PlayingCard(ACE, SPADE))
+        state.stock.addAll(listOf(PlayingCard(ACE, SPADE), PlayingCard(ACE, SPADE)))
 
         val player1Turn = StateBasedPlayerTurn(state, meldValidator)
         player1Turn.takeCard()
@@ -136,7 +131,7 @@ internal class StateBasedPlayerTurnTest {
         playerTurn.takeCard()
 
         playerTurn.meld(cards, 0)
-        assertTrue(state.hand(player1)?.size == 0)
+        assertTrue(state.hand(player1)?.size == 1)
     }
 
     @Test

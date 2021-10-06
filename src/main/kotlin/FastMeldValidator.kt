@@ -8,27 +8,27 @@ class FastMeldValidator : MeldValidator {
     private val suitValues: List<Float> = PlayingCard.Suit.values().map { it.binaryValue.toFloat() }
 
     // 1. evaluate if a meld is valid or not, sequence or combination
-    override fun isValid(playingCards: List<PlayingCard>): Boolean {
-        if (playingCards.size !in 3..14) {
+    override fun isValid(cards: List<PlayingCard>): Boolean {
+        if (cards.size !in 3..14) {
             return false
         }
 
-        val sumSuits: Int = playingCards.sumBy { if (it.suit != null) it.suit.binaryValue else 0 }
+        val sumSuits: Int = cards.sumBy { if (it.suit != null) it.suit.binaryValue else 0 }
 
-        val avgSuit = sumSuits.toFloat() / playingCards.size.toFloat()
-        val avgSuitMinusSpade = (sumSuits.toFloat() - SPADE.binaryValue) / (playingCards.size.toFloat() - 1)
-        val avgSuitMinusHeart = (sumSuits.toFloat() - HEART.binaryValue) / (playingCards.size.toFloat() - 1)
-        val avgSuitMinusDiamond = (sumSuits.toFloat() - DIAMOND.binaryValue) / (playingCards.size.toFloat() - 1)
-        val avgSuitMinusClub = (sumSuits.toFloat() - CLUB.binaryValue) / (playingCards.size.toFloat() - 1)
+        val avgSuit = sumSuits.toFloat() / cards.size.toFloat()
+        val avgSuitMinusSpade = (sumSuits.toFloat() - SPADE.binaryValue) / (cards.size.toFloat() - 1)
+        val avgSuitMinusHeart = (sumSuits.toFloat() - HEART.binaryValue) / (cards.size.toFloat() - 1)
+        val avgSuitMinusDiamond = (sumSuits.toFloat() - DIAMOND.binaryValue) / (cards.size.toFloat() - 1)
+        val avgSuitMinusClub = (sumSuits.toFloat() - CLUB.binaryValue) / (cards.size.toFloat() - 1)
 
-        val sumValues: Int = playingCards.sumBy { it.value.binaryValue }
-        val avgValue = sumValues.toFloat() / playingCards.size.toFloat()
+        val sumValues: Int = cards.sumBy { it.value.binaryValue }
+        val avgValue = sumValues.toFloat() / cards.size.toFloat()
 
         if (suitValues.any { it == avgSuit || it == avgSuitMinusSpade || it == avgSuitMinusHeart || it == avgSuitMinusDiamond || it == avgSuitMinusClub }
             && avgValue !in cardValues) {
-            if (validSequence(sumValues, avgSuit)) return true
+            if (validSequence(sumValues, avgSuit, cards, suitValues, avgSuitMinusSpade, avgSuitMinusHeart, avgSuitMinusDiamond, avgSuitMinusClub)) return true
         } else {
-            if (validCombination(sumValues, playingCards, avgValue)) return true
+            if (validCombination(sumValues, cards, avgValue)) return true
         }
 
         return false
@@ -49,24 +49,39 @@ class FastMeldValidator : MeldValidator {
         return false
     }
 
-    private fun validSequence(sumValues: Int, avgSuit: Float): Boolean {
+    private fun validSequence(
+        sumValues: Int,
+        avgSuit: Float,
+        cards: List<PlayingCard>,
+        suitValues: List<Float>,
+        avgSuitMinusSpade: Float,
+        avgSuitMinusHeart: Float,
+        avgSuitMinusDiamond: Float,
+        avgSuitMinusClub: Float
+    ): Boolean {
         // validate sequence
         val lsb = sumValues.takeLowestOneBit()
         val result = sumValues / lsb
 
         // check if all 1s therefore valid sequence
-        if (suitValues.any { it == avgSuit } && ((result + 1) and result == 0) and (result != 0)) {
+        if (this.suitValues.any { it == avgSuit } && ((result + 1) and result == 0) and (result != 0)) {
             return true
         }
 
         // check if we have a 2 to play with !if 2 twos this will not work!!
-        if (lsb == 1) {
+        if (lsb == 1
+            || (avgSuitMinusSpade in suitValues && (cards.contains(PlayingCard(TWO, SPADE))))
+            || (avgSuitMinusHeart in suitValues && (cards.contains(PlayingCard(TWO, HEART))))
+            || (avgSuitMinusDiamond in suitValues && (cards.contains(PlayingCard(TWO, DIAMOND))))
+            || (avgSuitMinusClub in suitValues && (cards.contains(PlayingCard(TWO, CLUB))))
+        ) {
             val newBinaryValues = sumValues.shr(1)
             val newLsb = newBinaryValues.takeLowestOneBit()
             if (binaryZeros(newBinaryValues / newLsb) <= 1) {
                 return true
             }
         }
+        // highest one bit could be there if we had two kings as well?
         if (sumValues.takeHighestOneBit() == JOKER.binaryValue && binaryZeros((sumValues - JOKER.binaryValue) / sumValues.takeLowestOneBit()) <= 1) {
             return true
         }
