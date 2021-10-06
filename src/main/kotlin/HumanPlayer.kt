@@ -1,15 +1,14 @@
 class HumanPlayer(private val name: String) : Player {
 
     override fun takeTurn(state: State, turn: PlayerTurn) {
-        println("--- Player ($name) turn ---")
-
-        printGameState(state)
-
         takeCardInput(turn)
+        
+        state.printGameState(this)
 
-        printGameState(state)
         placeCardInput(state, turn)
     }
+
+    override fun name(): String = name
 
     private fun takeCardInput(turn: PlayerTurn) {
         println("Please choose an option:")
@@ -24,27 +23,6 @@ class HumanPlayer(private val name: String) : Player {
                     takeCardInput(turn)
                 }
             }
-        }
-    }
-
-    private fun printGameState(state: State) {
-        printPile(state)
-        printHand(state)
-        printMelds(state)
-    }
-
-    private fun printPile(state: State) {
-        if (state.discard.isNotEmpty()) {
-            val cards = state.discard.joinToString(", ")
-            println("Discard pile: $cards")
-        }
-    }
-
-    private fun printMelds(state: State) {
-        val melds = state.melds(this)
-        if (melds?.isNotEmpty() == true) {
-            val cards = melds.joinToString(" - ") { it.sorted().joinToString(", ") }
-            println("Melds: $cards")
         }
     }
 
@@ -66,7 +44,7 @@ class HumanPlayer(private val name: String) : Player {
                             ?.mapNotNull { index -> hand?.elementAt(index) }
                         if (result != null) {
                             if (turn.meld(result, 0)) {
-                                printGameState(state)
+                                state.printGameState(this)
                                 discardCardInput(state, turn)
                             } else {
                                 println("Error")
@@ -93,12 +71,6 @@ class HumanPlayer(private val name: String) : Player {
                 }
             }
         }
-    }
-
-    private fun printHand(state: State) {
-        val cards = state.hand(this)?.sorted()
-        val hand = cards?.joinToString(", ")
-        println("Hand: $hand")
     }
 
 //    fun takeCard(game: BurracoGame) {

@@ -3,12 +3,13 @@ class StateBasedPlayerTurn(private val state: State, private val meldValidator: 
     var takenCard: Boolean = false
     var discardedCard: Boolean = false
 
+    override fun performMove(move: Move) {
+        move.performMove()
+    }
+
     override fun takeCard(): Boolean {
         if (!takenCard) {
-            state.hands[state.playersTurn]?.add(state.stock.removeLast())
-
-            state.printTotalCardCount()
-
+            performMove(TakeCardMove(state))
             takenCard = true
             return true
         }
@@ -17,31 +18,45 @@ class StateBasedPlayerTurn(private val state: State, private val meldValidator: 
 
     override fun takePile(): Boolean {
         if (!takenCard) {
-            state.hands[state.playersTurn]?.addAll(state.discard)
-            state.discard.clear()
+            performMove(TakePileMove(state))
             takenCard = true
-
-            state.printTotalCardCount()
-
             return true
         }
         return false
     }
 
-    override fun discard(playingCard: PlayingCard): Boolean {
+    override fun discard(card: PlayingCard): Boolean {
         if (takenCard && !discardedCard) {
-            // if pot taken check if player has burraco, if not then cant discard final card
-            state.discard.add(playingCard)
-            state.hands[state.playersTurn]?.remove(playingCard)
+            performMove(DiscardMove(card, state))
             discardedCard = true
 
-            state.printTotalCardCount()
-            //check if hand empty and award pot if not already taken
-            if(playerCanTakePot()) {
-                state.pots[state.playersTurn]?.toMutableList()?.let { state.hands[state.playersTurn]?.addAll(it) }
-                state.pots[state.playersTurn]?.clear()
+            if (playerCanTakePot()) {
+                performMove(TakePotMove(state))
             }
+            return true
+        }
+        return false
+    }
+    
+    override fun meld(cards: List<PlayingCard>, i: Int): Boolean {
+        if (takenCard) {
+            performMove(MeldMove(meldValidator, cards, state))
 
+            if (playerCanTakePot()) {
+                performMove(TakePotMove(state))
+            }
+            return true
+        }
+        return false
+    }
+
+    override fun meld(cards: List<PlayingCard>): Boolean {
+        if (takenCard) {
+            performMove(MeldMove(meldValidator, cards, state))
+
+            if (playerCanTakePot()) {
+                performMove(TakePotMove(state))
+            }
             return true
         }
         return false
@@ -50,20 +65,5 @@ class StateBasedPlayerTurn(private val state: State, private val meldValidator: 
     private fun playerCanTakePot() = (state.hand(state.playersTurn)?.isEmpty() == true && !playerHasTakenPot())
 
     private fun playerHasTakenPot() = state.pots[state.playersTurn]?.isEmpty() == true
-
-    override fun meld(playingCard: List<PlayingCard>, index: Int): Boolean {
-        if (takenCard) {
-            if (meldValidator.isValid(playingCard)) {
-                state.melds[state.playersTurn]?.add(playingCard.toMutableList())
-                state.hands[state.playersTurn]?.removeAll(playingCard)
-
-                state.printTotalCardCount()
-
-                return true
-                //check if taken pot already
-                // if not and hand is empty reset takenCard to allow more cards to be played
-            }
-        }
-        return false
-    }
+    
 }
