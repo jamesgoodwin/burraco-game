@@ -40,7 +40,7 @@ class StateBasedPlayerTurn(private val state: State, private val meldValidator: 
     
     override fun meld(cards: List<PlayingCard>, i: Int): Boolean {
         if (takenCard) {
-            performMove(MeldMove(meldValidator, cards, state))
+            performMove(NewMeldMove(meldValidator, cards, state))
 
             if (playerCanTakePot()) {
                 performMove(TakePotMove(state))
@@ -52,7 +52,7 @@ class StateBasedPlayerTurn(private val state: State, private val meldValidator: 
 
     override fun meld(cards: List<PlayingCard>): Boolean {
         if (takenCard) {
-            performMove(MeldMove(meldValidator, cards, state))
+            performMove(NewMeldMove(meldValidator, cards, state))
 
             if (playerCanTakePot()) {
                 performMove(TakePotMove(state))

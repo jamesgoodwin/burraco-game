@@ -35,19 +35,6 @@ class HandEvaluator(private val meldValidator: MeldValidator) : MeldEvaluator {
             melds.addAll(listOf(it.value))
         }
 
-//        if (wildcards.isNotEmpty()) {
-//            if (cardsBySuit.isNotEmpty()) {
-//                cardsBySuit.forEach { suitCard ->
-//                    wildcards.forEach { longestMelds.addAll(listOf(suitCard.value.toList() + it)) }
-//                }
-//            }
-//            if (cardsByValue.isNotEmpty()) {
-//                cardsByValue.forEach { valueCard ->
-//                    wildcards.forEach { longestMelds.addAll(listOf(valueCard.value.toList() + it)) }
-//                }
-//            }
-//        }
-
         return melds
     }
 
