@@ -18,7 +18,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "com.jamesgoodwin"
             artifactId = "burraco-engine"
-            version = "0.1-SNAPSHOT"
+            version = "0.1"
 
             from(components["java"])
         }
