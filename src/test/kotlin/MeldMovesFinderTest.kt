@@ -1,5 +1,6 @@
 import PlayingCard.Suit.DIAMOND
 import PlayingCard.Suit.HEART
+import org.junit.Ignore
 import org.junit.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -7,6 +8,7 @@ import kotlin.test.assertTrue
 internal class MeldMovesFinderTest {
 
     @Test
+    @Ignore
     fun shouldMeldNew() {
         val meldMovesFinder = MeldMovesFinder(FastMeldValidator())
         val hand = listOf(
