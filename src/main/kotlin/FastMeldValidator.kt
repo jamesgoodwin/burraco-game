@@ -88,7 +88,7 @@ class FastMeldValidator : MeldValidator {
         return false
     }
 
-    // 2. evaluate if burraco, semi-clean burraco, dirty burraco, or none
+    // 2. todo - evaluate if burraco, semi-clean burraco, dirty burraco, or none
 
     private fun binaryZeros(n: Int): Int {
         var number = n

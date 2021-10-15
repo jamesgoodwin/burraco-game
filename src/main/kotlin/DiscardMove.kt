@@ -7,4 +7,5 @@ class DiscardMove(private val card: PlayingCard, private val state: State) : Mov
         state.printTotalCardCount()
         return true
     }
+
 }
