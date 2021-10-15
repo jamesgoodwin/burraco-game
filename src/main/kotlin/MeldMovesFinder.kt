@@ -3,9 +3,9 @@ import kotlin.math.min
 
 class MeldMovesFinder(val meldValidator: MeldValidator) {
 
-    fun findMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): List<Move>? {
+    fun findMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): List<Move> {
         val handBySuit = hand.groupBy { it.suit }
-        val wildcards = hand.filter { it.value == PlayingCard.Value.TWO || it.value == PlayingCard.Value.JOKER }
+//        val wildcards = hand.filter { it.value == PlayingCard.Value.TWO || it.value == PlayingCard.Value.JOKER }
 
         val meldsBySuit = melds.groupBy { it.suite() }
 
@@ -22,7 +22,7 @@ class MeldMovesFinder(val meldValidator: MeldValidator) {
             allCombinations
         }.flatten()
             .map {
-                createWindows(it, wildcards)
+                createWindows(it)
             }
             .flatten()
             .filter { meldValidator.isValid(it.meldCombo) }
@@ -30,21 +30,20 @@ class MeldMovesFinder(val meldValidator: MeldValidator) {
     }
 
     private fun createWindows(
-        values: Triple<Int, List<PlayingCard>, List<PlayingCard>>,
-        wildcards: List<PlayingCard>
+        values: Triple<Int, List<PlayingCard>, List<PlayingCard>>
     ): List<MeldAttempt> {
         val windows = mutableListOf(listOf(listOf<PlayingCard>()))
 
         if (values.third.isNotEmpty()) {
-            windows.addAll(getWindowsWithExistingMeld(values, wildcards))
+            windows.addAll(getWindowsWithExistingMeld(values))
         } else {
-            windows.addAll(getWindowsWithNewMeld(values.second, wildcards))
+            windows.addAll(getWindowsWithNewMeld(values.second))
         }
         return windows.flatten()
             .map { MeldAttempt(values.first, it - values.third, values.third, it) }
     }
 
-    private fun getWindowsWithNewMeld(allCards: List<PlayingCard>, wildcards: List<PlayingCard>): Collection<List<List<PlayingCard>>> {
+    private fun getWindowsWithNewMeld(allCards: List<PlayingCard>): Collection<List<List<PlayingCard>>> {
         val windows = mutableListOf(listOf(listOf<PlayingCard>()))
         // loop from current size down to meld size + 1
         for (i in allCards.size downTo 3) {
@@ -54,19 +53,18 @@ class MeldMovesFinder(val meldValidator: MeldValidator) {
     }
 
     private fun getWindowsWithExistingMeld(
-        values: Triple<Int, List<PlayingCard>, List<PlayingCard>>,
-        wildcards: List<PlayingCard>
+        values: Triple<Int, List<PlayingCard>, List<PlayingCard>>
     ): Collection<List<List<PlayingCard>>> {
         val allCards = (values.second + values.third).sorted()
         val firstCardIndex = allCards.indexOf(values.third.first())
         val lastCardIndex = allCards.indexOf(values.third.last())
 
         // check if there's a 1 space gap
-        val range = allCards.last().value.ordinal - allCards.first().value.ordinal
+//        val range = allCards.last().value.ordinal - allCards.first().value.ordinal
 
-        if (allCards.size == range + 1 && wildcards.isNotEmpty()) {
-            //use a wildcard
-        }
+//        if (allCards.size == range + 1 && wildcards.isNotEmpty()) {
+//            //use a wildcard
+//        }
 
         val windows = mutableListOf(listOf(listOf<PlayingCard>()))
         // loop from current size down to meld size + 1
