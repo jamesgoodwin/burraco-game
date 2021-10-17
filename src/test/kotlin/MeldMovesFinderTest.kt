@@ -17,10 +17,15 @@ internal class MeldMovesFinderTest {
         val melds = emptyList<Meld>()
         val state = State(listOf(HumanPlayer("bob"), HumanPlayer("sue")))
         val moves = meldMovesFinder.findMoves(hand, state, melds)
-        if (moves != null) {
-            assertTrue(moves.isNotEmpty())
-        }
+        assertTrue(moves.isNotEmpty())
     }
+
+    //test - 10♥, Q♥, K♥, K♥, 8♦, 10♦, 4♣, 5♣, 5♣, 7♣, 9♣, 4♠, Q♠, Q♠, K♠
+
+//    T: 108, H: 17, M: 9, P:22, S:60, D:0
+//    Hand: 10♥, Q♥, K♥, K♥, 8♦, 10♦, 4♣, 5♣, 5♣, 7♣, 9♣, 4♠
+//    Melds: Q♠, Q♠, K♠
+//    Enter a card to discard
 
     @Test
     fun shouldMeldToExisting() {

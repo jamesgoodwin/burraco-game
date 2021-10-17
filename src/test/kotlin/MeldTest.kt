@@ -63,6 +63,12 @@ internal class MeldTest {
         assertNull(meld.suite())
     }
 
+//    Choose cards to meld
+//    1. Meld 3♣,3♣,5♣,6♣,7♣
+//    2. Meld 3♣,3♣,5♣,6♣
+//    3. Meld 3♣,3♣,5♣
+//    4. Meld 5♣,6♣,7♣
+
     @Test
     fun isAllSameValueWithJokerWildcard() {
         val meld = Meld(

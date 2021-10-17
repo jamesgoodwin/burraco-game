@@ -29,8 +29,21 @@ class HumanPlayer(private val name: String) : Player {
     }
 
     private fun placeCardInput(state: State, turn: PlayerTurn) {
+        val handState = state.hand(this)
+        val meldsState = state.melds(this)?.map { cards -> Meld(cards) }
+
+        val moves = if (handState != null && meldsState != null) {
+            meldMovesFinder.findMoves(handState, state, meldsState)
+        } else {
+            null
+        }
+
         println("Please choose an option:")
-        println("1. to discard a card\n2. to meld cards")
+        if(moves?.isNotEmpty() == true) {
+            println("1. to discard a card\n2. to meld cards")
+        } else {
+            println("1. to discard a card")
+        }
 
         readLine().let {
             when (it) {
@@ -38,33 +51,37 @@ class HumanPlayer(private val name: String) : Player {
                     discardCardInput(state, turn)
                 }
                 "2" -> {
-                    val handState = state.hand(this)
-                    val meldsState = state.melds(this)?.map { cards -> Meld(cards) }
-
-                    if (handState != null && meldsState != null) {
-                        println("Choose cards to meld")
-                        val moves = meldMovesFinder.findMoves(handState, state, meldsState)
-                        moves?.forEachIndexed { index, move ->
-                            println("${index+1}. ${move.toString()}")
-                        }
-                        readLine().let { cards ->
-                            val hand = state.hand(this)?.sorted()
-                            val result = cards?.split(",")
-                                ?.map { index -> Integer.valueOf(index) - 1 }
-                                ?.mapNotNull { index -> hand?.elementAt(index) }
-                            if (result != null) {
-                                if (turn.meld(result, 0)) {
-                                    state.printGameState(this)
-                                    discardCardInput(state, turn)
-                                } else {
-                                    println("Error")
-                                    placeCardInput(state, turn)
-                                }
-                            }
-                        }
-                    } else {
-                        placeCardInput(state, turn)
+                    println("Choose cards to meld")
+                    moves?.forEachIndexed { index, move ->
+                        println("${index + 1}. $move")
                     }
+                    readLine()?.let { meldIndex ->
+                        val move = moves?.get(meldIndex.toInt() - 1)
+                        if (move != null && turn.meld(move)) {
+                            state.printGameState(this)
+                            discardCardInput(state, turn)
+                        } else {
+                            println("Error")
+                            placeCardInput(state, turn)
+                        }
+                    }
+
+//                        readLine().let { cards ->
+//                            val hand = state.hand(this)?.sorted()
+//                            val result = cards?.split(",")
+//                                ?.map { index -> Integer.valueOf(index) - 1 }
+//                                ?.mapNotNull { index -> hand?.elementAt(index) }
+//                            if (result != null) {
+//                                if (turn.meld(result, 0)) {
+//                                    state.printGameState(this)
+//                                    discardCardInput(state, turn)
+//                                } else {
+//                                    println("Error")
+//                                    placeCardInput(state, turn)
+//                                }
+//                            }
+//                        }
+
                 }
                 else -> {
                     println("Error")

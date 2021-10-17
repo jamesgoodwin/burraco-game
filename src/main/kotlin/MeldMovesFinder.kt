@@ -3,7 +3,7 @@ import kotlin.math.min
 
 class MeldMovesFinder(val meldValidator: MeldValidator) {
 
-    fun findMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): List<Move> {
+    fun findMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): List<MeldMove> {
         val handBySuit = hand.groupBy { it.suit }
 //        val wildcards = hand.filter { it.value == PlayingCard.Value.TWO || it.value == PlayingCard.Value.JOKER }
 
@@ -26,7 +26,14 @@ class MeldMovesFinder(val meldValidator: MeldValidator) {
             }
             .flatten()
             .filter { meldValidator.isValid(it.meldCombo) }
-            .map { ExistingMeldMove(meldValidator, it, state) }.toList()
+            .map {
+                val meldMove: MeldMove = if(it.existingMeld.isNotEmpty()) {
+                    ExistingMeldMove(meldValidator, it, state)
+                } else {
+                    NewMeldMove(meldValidator, it.handCardsUsed, state)
+                }
+                meldMove
+            }.toList()
     }
 
     private fun createWindows(

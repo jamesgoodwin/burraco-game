@@ -64,7 +64,7 @@ class FastMeldValidator : MeldValidator {
         val result = sumValues / lsb
 
         // check if all 1s therefore valid sequence
-        if (this.suitValues.any { it == avgSuit } && ((result + 1) and result == 0) and (result != 0)) {
+        if (Integer.toBinaryString(result).length == cards.size && avgSuit in suitValues) {
             return true
         }
 

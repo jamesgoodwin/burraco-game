@@ -62,6 +62,17 @@ class StateBasedPlayerTurn(private val state: State, private val meldValidator: 
         return false
     }
 
+    override fun meld(move: MeldMove): Boolean {
+        if (takenCard) {
+            performMove(move)
+            if (playerCanTakePot()) {
+                performMove(TakePotMove(state))
+            }
+            return true
+        }
+        return false
+    }
+
     private fun playerCanTakePot() = (state.hand(state.playersTurn)?.isEmpty() == true && !playerHasTakenPot())
 
     private fun playerHasTakenPot() = state.pots[state.playersTurn]?.isEmpty() == true

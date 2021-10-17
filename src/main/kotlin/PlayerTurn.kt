@@ -7,5 +7,6 @@ interface PlayerTurn {
     fun discard(card: PlayingCard): Boolean
     fun meld(cards: List<PlayingCard>, i: Int): Boolean
     fun meld(cards: List<PlayingCard>): Boolean
+    fun meld(move: MeldMove): Boolean
 }
 

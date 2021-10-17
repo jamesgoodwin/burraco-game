@@ -1,8 +1,8 @@
 class ExistingMeldMove(
     val meldValidator: MeldValidator,
-    val meldToExistingSummary: MeldAttempt,
+    private val meldToExistingSummary: MeldAttempt,
     val state: State
-) : Move {
+) : MeldMove {
 
     override fun performMove(): Boolean {
         TODO("Not yet implemented")
