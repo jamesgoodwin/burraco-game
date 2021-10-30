@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="MeldMovesFinderTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2021-10-30T06:05:44" hostname="Jamess-MBP" time="0.055">
-  <properties/>
-  <testcase name="shouldMeldNew" classname="MeldMovesFinderTest" time="0.054"/>
-  <testcase name="shouldMeldToExisting" classname="MeldMovesFinderTest" time="0.001"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
