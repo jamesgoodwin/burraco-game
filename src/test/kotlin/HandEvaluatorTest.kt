@@ -10,11 +10,6 @@ internal class HandEvaluatorTest {
 
     @Test
     fun getMeldsReturnsValidSequence() {
-        val meldValidator = object : MeldValidator {
-            override fun isValid(cards: List<PlayingCard>): Boolean {
-                return true
-            }
-        }
         val evaluator = HandEvaluator()
         val cards = listOf(
             PlayingCard(Value.JACK, DIAMOND),
@@ -30,11 +25,6 @@ internal class HandEvaluatorTest {
 
     @Test
     fun getMeldsReturnsValidSequenceWithWildCard() {
-        val meldValidator = object : MeldValidator {
-            override fun isValid(cards: List<PlayingCard>): Boolean {
-                return true
-            }
-        }
         val evaluator = HandEvaluator()
         val cards = listOf(
             PlayingCard(Value.JACK, DIAMOND),
@@ -50,11 +40,6 @@ internal class HandEvaluatorTest {
 
     @Test
     fun getMeldsReturnsValidSubSequences() {
-        val meldValidator = object : MeldValidator {
-            override fun isValid(cards: List<PlayingCard>): Boolean {
-                return true
-            }
-        }
         val evaluator = HandEvaluator()
         val cards = listOf(
             PlayingCard(Value.SIX, DIAMOND),
@@ -90,11 +75,6 @@ internal class HandEvaluatorTest {
 
     @Test
     fun getMeldsReturnsValidCombination() {
-        val meldValidator = object : MeldValidator {
-            override fun isValid(cards: List<PlayingCard>): Boolean {
-                return true
-            }
-        }
         val evaluator = HandEvaluator()
         val cards = listOf(
             PlayingCard(Value.JACK, DIAMOND),

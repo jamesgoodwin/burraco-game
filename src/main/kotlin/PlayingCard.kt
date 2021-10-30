@@ -1,5 +1,11 @@
 data class PlayingCard(val value: Value, val suit: Suit? = null) : Comparable<PlayingCard> {
 
+    companion object {
+        fun wildcards(card: PlayingCard) = card.value == Value.TWO || card.value == Value.JOKER
+    }
+
+    val wildcard = value == Value.TWO || value == Value.JOKER
+
     enum class Suit(val symbol: Char, val binaryValue: Int) {
         HEART('♥', 1),
         DIAMOND('♦', 2),

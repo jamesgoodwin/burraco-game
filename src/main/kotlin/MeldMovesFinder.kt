@@ -5,19 +5,44 @@ class MeldMovesFinder {
 
     fun findMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): List<MeldMove> {
         val handBySuit = hand.groupBy { it.suit }
-//        val wildcards = hand.filter { it.value == PlayingCard.Value.TWO || it.value == PlayingCard.Value.JOKER }
+        val handByValue = hand.groupBy { it.value }
+        val wildcards = hand.filter { it.wildcard }
 
         val meldsBySuit = melds.groupBy { it.suit }
+        val meldsByValue = melds.groupBy { it.value }
 
-        return handBySuit.map { handCards ->
+        return sequenceMoves(handBySuit, wildcards, meldsBySuit, state) + combinationMoves(
+            handByValue,
+            wildcards,
+            meldsByValue,
+            state
+        )
+    }
+
+    private fun combinationMoves(
+        handByValue: Map<PlayingCard.Value, List<PlayingCard>>,
+        wildcards: List<PlayingCard>,
+        meldsByValue: Map<PlayingCard.Value?, List<Meld>>,
+        state: State
+    ): List<MeldMove> {
+        return handByValue.map { handCards ->
             val allCombinations = mutableListOf<Triple<Int, List<PlayingCard>, List<PlayingCard>>>()
-            if (handCards.value.size > 2) {
-                // todo - need to do windows as with existing meld
+            if (handCards.value.size >= 3) {
                 allCombinations.add(Triple(-1, handCards.value, emptyList()))
+                if (wildcards.isNotEmpty()) {
+                    wildcards.forEach { wildcard ->
+                        allCombinations.add(Triple(-1, handCards.value + wildcard, emptyList()))
+                    }
+                }
             }
-            meldsBySuit[handCards.key]?.forEach {
-                it.cards + handCards.value
+
+            meldsByValue[handCards.key]?.forEach {
                 allCombinations.add(Triple(-1, handCards.value, it.cards))
+                if (wildcards.isNotEmpty()) {
+                    wildcards.forEach { wildcard ->
+                        allCombinations.add(Triple(-1, handCards.value + wildcard, it.cards))
+                    }
+                }
             }
             allCombinations
         }.flatten()
@@ -35,6 +60,48 @@ class MeldMovesFinder {
                 meldMove
             }.toList()
     }
+
+    private fun sequenceMoves(
+        handBySuit: Map<PlayingCard.Suit?, List<PlayingCard>>,
+        wildcards: List<PlayingCard>,
+        meldsBySuit: Map<PlayingCard.Suit?, List<Meld>>,
+        state: State
+    ) = handBySuit.map { handCards ->
+        val allCombinations = mutableListOf<Triple<Int, List<PlayingCard>, List<PlayingCard>>>()
+        // check for new melds
+        if (handCards.value.size in 3..14 || (handCards.value.size == 2 && wildcards.size in 1..2)) {
+            allCombinations.add(Triple(-1, handCards.value, emptyList()))
+            if (wildcards.isNotEmpty()) {
+                wildcards.forEach { wildcard ->
+                    allCombinations.add(Triple(-1, handCards.value + wildcard, emptyList()))
+                }
+            }
+        }
+        // check for adding cards to existing melds
+        meldsBySuit[handCards.key]?.forEach {
+//            it.cards + handCards.value
+            allCombinations.add(Triple(-1, handCards.value, it.cards))
+            if (wildcards.isNotEmpty()) {
+                wildcards.forEach { wildcard ->
+                    allCombinations.add(Triple(-1, handCards.value + wildcard, it.cards))
+                }
+            }
+        }
+        allCombinations
+    }.flatten()
+        .map {
+            createWindows(it)
+        }
+        .flatten()
+        .filter { Meld(it.meldCombo).valid }
+        .map {
+            val meldMove: MeldMove = if (it.existingMeld.isNotEmpty()) {
+                ExistingMeldMove(it, state)
+            } else {
+                NewMeldMove(Meld(it.handCardsUsed), state)
+            }
+            meldMove
+        }.toList()
 
     private fun createWindows(
         values: Triple<Int, List<PlayingCard>, List<PlayingCard>>
