@@ -14,7 +14,7 @@ internal class PlayerTurnTest {
         val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
-        val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
+        val playerTurn = StateBasedPlayerTurn(state)
         playerTurn.takeCard()
 
         assertTrue(state.hand(player1)?.size == 1)
@@ -27,7 +27,7 @@ internal class PlayerTurnTest {
 
         state.stock.add(card)
 
-        val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
+        val playerTurn = StateBasedPlayerTurn(state)
         val taken = playerTurn.takeCard()
 
         val discarded = state.hand(player1)?.get(0)?.let {
@@ -39,19 +39,17 @@ internal class PlayerTurnTest {
 
     @Test
     fun shouldBeAbleToTakeACardPLayer2AfterPlayer1DiscardsACard() {
-        val meldValidator = FastMeldValidator()
-
         val state = State(listOf(player1, player2))
         state.stock.addAll(listOf(PlayingCard(ACE, SPADE), PlayingCard(ACE, SPADE)))
 
-        val player1Turn = StateBasedPlayerTurn(state, meldValidator)
+        val player1Turn = StateBasedPlayerTurn(state)
         player1Turn.takeCard()
 
         state.hand(player1)?.get(0)?.let {
             player1Turn.discard(it)
         }
 
-        val player2Turn = StateBasedPlayerTurn(state, meldValidator)
+        val player2Turn = StateBasedPlayerTurn(state)
         assertTrue(player2Turn.takeCard())
     }
 
@@ -60,7 +58,7 @@ internal class PlayerTurnTest {
         val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
-        val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
+        val playerTurn = StateBasedPlayerTurn(state)
         playerTurn.takeCard()
 
         state.hand(player1)?.get(0)?.let {
@@ -75,7 +73,7 @@ internal class PlayerTurnTest {
         val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
-        val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
+        val playerTurn = StateBasedPlayerTurn(state)
         playerTurn.takeCard()
 
         assertFalse(playerTurn.takeCard())
@@ -86,7 +84,7 @@ internal class PlayerTurnTest {
         val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
-        val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
+        val playerTurn = StateBasedPlayerTurn(state)
         assertFalse(playerTurn.discard(PlayingCard(ACE, SPADE)))
     }
 
@@ -95,7 +93,7 @@ internal class PlayerTurnTest {
         val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
-        val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
+        val playerTurn = StateBasedPlayerTurn(state)
         playerTurn.takeCard()
 
         playerTurn.discard(PlayingCard(ACE, SPADE))
@@ -107,7 +105,7 @@ internal class PlayerTurnTest {
         val state = State(listOf(player1, player2))
         state.stock.add(PlayingCard(ACE, SPADE))
 
-        val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
+        val playerTurn = StateBasedPlayerTurn(state)
         playerTurn.takeCard()
 
         playerTurn.discard(PlayingCard(ACE, SPADE))
@@ -127,7 +125,7 @@ internal class PlayerTurnTest {
 
         state.hands[player1]?.addAll(cards)
 
-        val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
+        val playerTurn = StateBasedPlayerTurn(state)
         playerTurn.takeCard()
 
         playerTurn.meld(cards, 0)
@@ -147,7 +145,7 @@ internal class PlayerTurnTest {
 
         state.hands[player1]?.addAll(cards)
 
-        val playerTurn = StateBasedPlayerTurn(state, FastMeldValidator())
+        val playerTurn = StateBasedPlayerTurn(state)
         playerTurn.takeCard()
 
         playerTurn.meld(cards, 0)

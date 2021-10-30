@@ -8,7 +8,7 @@ internal class MeldMovesFinderTest {
 
     @Test
     fun shouldMeldNew() {
-        val meldMovesFinder = MeldMovesFinder(FastMeldValidator())
+        val meldMovesFinder = MeldMovesFinder()
         val hand = listOf(
             PlayingCard(PlayingCard.Value.SIX, HEART),
             PlayingCard(PlayingCard.Value.SEVEN, HEART),
@@ -29,7 +29,7 @@ internal class MeldMovesFinderTest {
 
     @Test
     fun shouldMeldToExisting() {
-        val meldMovesFinder = MeldMovesFinder(FastMeldValidator())
+        val meldMovesFinder = MeldMovesFinder()
         val hand = listOf(
             PlayingCard(PlayingCard.Value.SIX, HEART),
             PlayingCard(PlayingCard.Value.EIGHT, HEART),

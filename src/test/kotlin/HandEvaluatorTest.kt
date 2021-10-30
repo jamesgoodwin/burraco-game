@@ -15,7 +15,7 @@ internal class HandEvaluatorTest {
                 return true
             }
         }
-        val evaluator = HandEvaluator(meldValidator)
+        val evaluator = HandEvaluator()
         val cards = listOf(
             PlayingCard(Value.JACK, DIAMOND),
             PlayingCard(Value.QUEEN, DIAMOND),
@@ -35,7 +35,7 @@ internal class HandEvaluatorTest {
                 return true
             }
         }
-        val evaluator = HandEvaluator(meldValidator)
+        val evaluator = HandEvaluator()
         val cards = listOf(
             PlayingCard(Value.JACK, DIAMOND),
             PlayingCard(Value.KING, DIAMOND),
@@ -55,7 +55,7 @@ internal class HandEvaluatorTest {
                 return true
             }
         }
-        val evaluator = HandEvaluator(meldValidator)
+        val evaluator = HandEvaluator()
         val cards = listOf(
             PlayingCard(Value.SIX, DIAMOND),
             PlayingCard(Value.SEVEN, DIAMOND),
@@ -95,7 +95,7 @@ internal class HandEvaluatorTest {
                 return true
             }
         }
-        val evaluator = HandEvaluator(meldValidator)
+        val evaluator = HandEvaluator()
         val cards = listOf(
             PlayingCard(Value.JACK, DIAMOND),
             PlayingCard(Value.JACK, DIAMOND),

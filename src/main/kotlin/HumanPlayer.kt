@@ -1,6 +1,6 @@
 class HumanPlayer(private val name: String) : Player {
 
-    val meldMovesFinder = MeldMovesFinder(FastMeldValidator())
+    private val meldMovesFinder = MeldMovesFinder()
 
     override fun takeTurn(state: State, turn: PlayerTurn) {
         takeCardInput(turn)

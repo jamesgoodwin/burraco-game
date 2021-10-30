@@ -1,35 +1,107 @@
-import PlayingCard.Suit.SPADE
+import PlayingCard.Value.*
 
 data class Meld(val cards: List<PlayingCard>) {
 
-    object CardValues {
-        internal val suitValues: List<Float> = PlayingCard.Suit.values().map { it.binaryValue.toFloat() }
-        internal val cardValues: List<Float> = PlayingCard.Value.values().map { it.binaryValue.toFloat() }
+    var value: PlayingCard.Value?
+    var suit: PlayingCard.Suit?
+    private val wildcard: (PlayingCard) -> Boolean = { it.value == TWO || it.value == JOKER }
+
+    private val meldCardValues = cards.map { it.value }
+
+    val valid: Boolean
+    private val cardsOrdered: List<PlayingCard>
+
+    private val regularCards = cards.filterNot(wildcard).sorted()
+    private val wildcards = cards.filter(wildcard)
+
+    init {
+        var (meldSuit, meldValue: PlayingCard.Value?) = checkSuitAndValue()
+
+        // cannot be a combination in scenario of two wildcards so null it, i.e. Two and a Joker
+        meldValue = if (wildcards.size > 1) null else meldValue
+
+        when {
+            meldValue != null -> {
+                // check combination
+                val (list, validSequence) = checkCombination()
+                cardsOrdered = list
+                valid = validSequence
+            }
+            meldSuit != null -> {
+                // check sequence
+                val (list, validSequence) = checkSequence()
+                cardsOrdered = list
+                valid = validSequence
+            }
+            else -> {
+                cardsOrdered = cards
+                valid = false
+            }
+        }
+
+        suit = meldSuit
+        value = meldValue
     }
 
-    private val sumSuits: Int = cards.sumBy { if (it.suit != null) it.suit.binaryValue else 0 }
-    private val avgSuit = sumSuits.toFloat() / cards.size.toFloat()
-    private val avgSuitMinusSpade = (sumSuits.toFloat() - SPADE.binaryValue) / (cards.size.toFloat() - 1)
-    private val avgSuitMinusHeart = (sumSuits.toFloat() - PlayingCard.Suit.HEART.binaryValue) / (cards.size.toFloat() - 1)
-    private val avgSuitMinusDiamond = (sumSuits.toFloat() - PlayingCard.Suit.DIAMOND.binaryValue) / (cards.size.toFloat() - 1)
-    private val avgSuitMinusClub = (sumSuits.toFloat() - PlayingCard.Suit.CLUB.binaryValue) / (cards.size.toFloat() - 1)
+    private fun checkSuitAndValue(): Pair<PlayingCard.Suit?, PlayingCard.Value?> {
+        val cardsLeft = regularCards.toMutableList()
+        val first = cardsLeft.removeFirstOrNull()
+        var suit = first?.suit
+        var value: PlayingCard.Value? = first?.value
 
-    private val sumValues: Int = cards.sumBy { it.value.binaryValue }
-    private val avgValue = sumValues.toFloat() / cards.size.toFloat()
-    private val avgValueMinusTwo = (sumValues.toFloat() - PlayingCard.Value.TWO.binaryValue) / (cards.size.toFloat() - 1)
-    private val avgValueMinusJoker = (sumValues.toFloat() - PlayingCard.Value.JOKER.binaryValue) / (cards.size.toFloat() - 1)
-
-    fun isAllSameSuite(): Boolean {
-        return CardValues.suitValues.any { it == avgSuit || it == avgSuitMinusSpade || it == avgSuitMinusHeart || it == avgSuitMinusDiamond || it == avgSuitMinusClub }
+        cardsLeft.forEach {
+            if (it.suit != suit) {
+                suit = null
+            }
+            if (it.value != value) {
+                value = null
+            }
+        }
+        return Pair(suit, value)
     }
 
-    fun suite(): PlayingCard.Suit? {
-        val averages = listOf(avgSuit, avgSuitMinusClub, avgSuitMinusDiamond, avgSuitMinusHeart, avgSuitMinusSpade)
-        return PlayingCard.Suit.values().singleOrNull { it.binaryValue.toFloat() in averages } // if combination it wont be possible to determine suit
+    private fun checkCombination(): Pair<List<PlayingCard>, Boolean> {
+        val valid = regularCards.size >= 3 && wildcards.size <= 1 || regularCards.size == 2 && wildcards.size == 1
+        return Pair(cards, valid)
     }
 
-    fun isSameValue(): Boolean {
-        return CardValues.cardValues.any { it == avgValue || it == avgValueMinusTwo || it == avgValueMinusJoker }
-    }
+    private fun checkSequence(): Pair<List<PlayingCard>, Boolean> {
+        val cardsLeft = (regularCards + wildcards).toMutableList()
 
+        if (cardsLeft.size !in 3..14) return Pair(cardsLeft, false)
+
+        var previousCard: PlayingCard = cardsLeft.removeFirst()
+        var sequential = true
+        var wildCardUsed = false
+        val cardsBeingOrdered = mutableListOf(previousCard)
+
+        while (cardsLeft.isNotEmpty() && sequential) {
+            val nextCard = cardsLeft.removeFirst()
+
+            if (nextCard.value.ordinal == previousCard.value.ordinal + 1) {
+                previousCard = nextCard
+                cardsBeingOrdered.add(nextCard)
+            } else if (nextCard.value.ordinal == previousCard.value.ordinal + 2
+                && !wildCardUsed && (meldCardValues.contains(JOKER) || meldCardValues.contains(TWO)) // todo - needs to be checked using cards left instead of all cards
+            ) {
+                wildCardUsed = true
+                previousCard = nextCard
+                cardsBeingOrdered.add(nextCard)
+                // todo - need to add the wildcard used
+                cardsLeft.removeIf(wildcard)
+            } else if (previousCard.value == THREE && nextCard.value == TWO) {
+                // two becomes a natural two, swap previous and next
+                cardsBeingOrdered.add(cardsBeingOrdered.indexOf(previousCard), nextCard)
+            } else if (wildcard(nextCard) && !wildCardUsed) {
+                wildCardUsed = true
+                if (cardsLeft.isEmpty()) {
+                    cardsBeingOrdered.add(0, nextCard)
+                } else {
+                    cardsBeingOrdered.add(nextCard)
+                }
+            } else sequential = false
+        }
+
+        return Pair(cardsBeingOrdered.toList(), sequential)
+    }
 }

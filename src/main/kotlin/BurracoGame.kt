@@ -6,7 +6,7 @@ import kotlin.collections.ArrayList
 class BurracoGame(var state: State = State(
     listOf(
         HumanPlayer("1"),
-        LowAiPlayer(meldEvaluator = HandEvaluator(FastMeldValidator()))
+        LowAiPlayer(meldEvaluator = HandEvaluator())
     )
 )
 ) {
@@ -20,7 +20,7 @@ class BurracoGame(var state: State = State(
             val name = state.playersTurn.name()
             println("--- Player ($name) turn ---")
             state.printGameState(state.playersTurn)
-            state.playersTurn.takeTurn(state, StateBasedPlayerTurn(state, FastMeldValidator()))
+            state.playersTurn.takeTurn(state, StateBasedPlayerTurn(state))
             nextPlayer()
         }
     }

@@ -1,5 +1,4 @@
 class ExistingMeldMove(
-    val meldValidator: MeldValidator,
     private val meldToExistingSummary: MeldAttempt,
     val state: State
 ) : MeldMove {

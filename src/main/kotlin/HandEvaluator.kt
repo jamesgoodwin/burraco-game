@@ -1,7 +1,7 @@
 import PlayingCard.Value.JOKER
 import PlayingCard.Value.TWO
 
-class HandEvaluator(private val meldValidator: MeldValidator) : MeldEvaluator {
+class HandEvaluator : MeldEvaluator {
 
     override fun getMelds(cards: List<PlayingCard>): List<List<PlayingCard>> {
         val wildcards = cards.filter { it.value == TWO || it.value == JOKER }.toMutableList()

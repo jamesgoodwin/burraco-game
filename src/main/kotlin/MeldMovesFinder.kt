@@ -1,13 +1,13 @@
 import kotlin.math.max
 import kotlin.math.min
 
-class MeldMovesFinder(val meldValidator: MeldValidator) {
+class MeldMovesFinder {
 
     fun findMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): List<MeldMove> {
         val handBySuit = hand.groupBy { it.suit }
 //        val wildcards = hand.filter { it.value == PlayingCard.Value.TWO || it.value == PlayingCard.Value.JOKER }
 
-        val meldsBySuit = melds.groupBy { it.suite() }
+        val meldsBySuit = melds.groupBy { it.suit }
 
         return handBySuit.map { handCards ->
             val allCombinations = mutableListOf<Triple<Int, List<PlayingCard>, List<PlayingCard>>>()
@@ -25,12 +25,12 @@ class MeldMovesFinder(val meldValidator: MeldValidator) {
                 createWindows(it)
             }
             .flatten()
-            .filter { meldValidator.isValid(it.meldCombo) }
+            .filter { Meld(it.meldCombo).valid }
             .map {
-                val meldMove: MeldMove = if(it.existingMeld.isNotEmpty()) {
-                    ExistingMeldMove(meldValidator, it, state)
+                val meldMove: MeldMove = if (it.existingMeld.isNotEmpty()) {
+                    ExistingMeldMove(it, state)
                 } else {
-                    NewMeldMove(meldValidator, it.handCardsUsed, state)
+                    NewMeldMove(Meld(it.handCardsUsed), state)
                 }
                 meldMove
             }.toList()
@@ -87,9 +87,3 @@ class MeldMovesFinder(val meldValidator: MeldValidator) {
     }
 }
 
-data class MeldAttempt(
-    val index: Int = -1,
-    var handCardsUsed: List<PlayingCard> = emptyList(),
-    val existingMeld: List<PlayingCard> = emptyList(),
-    val meldCombo: List<PlayingCard> = emptyList()
-)

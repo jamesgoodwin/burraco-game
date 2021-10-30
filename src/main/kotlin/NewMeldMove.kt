@@ -1,13 +1,13 @@
 interface MeldMove : Move
 
-class NewMeldMove(private val meldValidator: MeldValidator, val cards: List<PlayingCard>, val state: State) : MeldMove {
+class NewMeldMove(val meld: Meld, val state: State) : MeldMove {
 
     override fun performMove(): Boolean {
-        if (state.hand(state.playersTurn)?.containsAll(cards) != true) return false
+        if (state.hand(state.playersTurn)?.containsAll(meld.cards) != true) return false
 
-        if (meldValidator.isValid(cards)) {
-            state.melds[state.playersTurn]?.add(cards.toMutableList())
-            cards.forEach { card ->
+        if (meld.valid) {
+            state.melds[state.playersTurn]?.add(meld.cards.toMutableList())
+            meld.cards.forEach { card ->
                 state.hands[state.playersTurn]?.remove(card)
             }
             state.printTotalCardCount()
@@ -17,7 +17,7 @@ class NewMeldMove(private val meldValidator: MeldValidator, val cards: List<Play
     }
 
     override fun toString(): String {
-        return "Meld " + cards.joinToString(",")
+        return "Meld " + meld.cards.joinToString(",")
     }
 
 }

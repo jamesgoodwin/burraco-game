@@ -1,10 +1,7 @@
 import PlayingCard.Suit.*
 import PlayingCard.Value.*
 import org.junit.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 internal class MeldTest {
 
@@ -17,8 +14,9 @@ internal class MeldTest {
                 PlayingCard(THREE, SPADE)
             )
         )
-        assertTrue(meld.isAllSameSuite())
-        assertEquals(meld.suite(), SPADE)
+        assertNotNull(meld.suit)
+        assertNull(meld.value)
+        assertEquals(meld.suit, SPADE)
     }
 
     @Test
@@ -30,9 +28,10 @@ internal class MeldTest {
                 PlayingCard(TWO, HEART)
             )
         )
-        assertTrue(meld.isAllSameSuite())
-        assertFalse(meld.isSameValue())
-        assertEquals(meld.suite(), SPADE)
+
+        assertNotNull(meld.suit)
+        assertNull(meld.value)
+        assertEquals(meld.suit, SPADE)
     }
 
     @Test
@@ -44,9 +43,8 @@ internal class MeldTest {
                 PlayingCard(FIVE, DIAMOND)
             )
         )
-        assertTrue(meld.isSameValue())
-        assertFalse(meld.isAllSameSuite())
-        assertNull(meld.suite())
+        assertNotNull(meld.value)
+        assertNull(meld.suit)
     }
 
     @Test
@@ -58,9 +56,8 @@ internal class MeldTest {
                 PlayingCard(TWO, DIAMOND)
             )
         )
-        assertTrue(meld.isSameValue())
-        assertFalse(meld.isAllSameSuite())
-        assertNull(meld.suite())
+        assertNotNull(meld.value)
+        assertNull(meld.suit)
     }
 
 //    Choose cards to meld
@@ -78,8 +75,7 @@ internal class MeldTest {
                 PlayingCard(JOKER, DIAMOND)
             )
         )
-        assertTrue(meld.isSameValue())
-        assertFalse(meld.isAllSameSuite())
-        assertNull(meld.suite())
+        assertNotNull(meld.value)
+        assertNull(meld.suit)
     }
 }

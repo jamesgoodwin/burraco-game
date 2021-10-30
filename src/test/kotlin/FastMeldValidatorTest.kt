@@ -6,9 +6,24 @@ import org.junit.Test
 
 internal class FastMeldValidatorTest {
 
+//    1. Meld A♥,K♥,K♥,5♥
+//    2. Meld A♥,K♥,K♥
+//    3. Meld A♣,9♣,K♣,8♣,K♣,10♣
+//    4. Meld A♣,9♣,K♣,8♣,K♣
+
     @Test
-    fun shouldBeAbleToMeldFullSuiteOfCards() {
-        val meldValidator = FastMeldValidator()
+    fun shouldNotBeAbleToMeldAceKingKing() {
+        val meld = listOf(
+            PlayingCard(ACE, SPADE),
+            PlayingCard(KING, SPADE),
+            PlayingCard(KING, SPADE)
+        )
+        assertFalse(Meld(meld).valid)
+    }
+
+    @Test
+    fun shouldNotBeAbleToMeldFullSuiteWithTwoAces() {
+
 
         val meld = listOf(
             PlayingCard(ACE, SPADE),
@@ -27,12 +42,12 @@ internal class FastMeldValidatorTest {
             PlayingCard(ACE, SPADE) //only valid if jolly, not ace
         )
 
-        assertTrue(meldValidator.isValid(meld))
+        assertFalse(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldTwoTwos() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(TWO, SPADE),
@@ -40,25 +55,23 @@ internal class FastMeldValidatorTest {
             PlayingCard(THREE, SPADE)
         )
 
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldTwoAndJoker() {
-        val meldValidator = FastMeldValidator()
-
         val meld = listOf(
             PlayingCard(TWO, SPADE),
             PlayingCard(JOKER),
             PlayingCard(THREE, SPADE)
         )
 
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldNotBeAbleToMeldTwoQueensAndAKing() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(QUEEN, SPADE),
@@ -66,12 +79,12 @@ internal class FastMeldValidatorTest {
             PlayingCard(KING, SPADE)
         )
 
-        assertFalse(meldValidator.isValid(meld))
+        assertFalse(Meld(meld).valid)
     }
 
     @Test
     fun shouldNotBeAbleToMeldTwoAndTwoKings() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(TWO, SPADE),
@@ -80,37 +93,35 @@ internal class FastMeldValidatorTest {
             PlayingCard(THREE, SPADE)
         )
 
-        assertFalse(meldValidator.isValid(meld))
+        assertFalse(Meld(meld).valid)
     }
 
     @Test
     fun shouldNotBeAbleToMeldThreeWildcards() {
-        val meldValidator = FastMeldValidator()
-
         assertFalse(
-            meldValidator.isValid(
+            Meld(
                 listOf(
                     PlayingCard(TWO, SPADE),
                     PlayingCard(TWO, HEART),
                     PlayingCard(TWO, SPADE)
                 )
-            )
+            ).valid
         )
 
         assertFalse(
-            meldValidator.isValid(
+            Meld(
                 listOf(
                     PlayingCard(JOKER),
                     PlayingCard(JOKER),
                     PlayingCard(JOKER)
                 )
-            )
+            ).valid
         )
     }
 
     @Test
     fun shouldBeAbleToMeldThreeStraightCards() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(JACK, SPADE),
@@ -118,12 +129,12 @@ internal class FastMeldValidatorTest {
             PlayingCard(KING, SPADE)
         )
 
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldTwoStraightCardsAndATwo() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(QUEEN, SPADE),
@@ -131,12 +142,12 @@ internal class FastMeldValidatorTest {
             PlayingCard(TWO, SPADE)
         )
 
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldTwoStraightCardsAndAnAce() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(QUEEN, SPADE),
@@ -144,12 +155,12 @@ internal class FastMeldValidatorTest {
             PlayingCard(ACE, SPADE)
         )
 
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldTenThroughToKing() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(JACK, SPADE),
@@ -158,12 +169,12 @@ internal class FastMeldValidatorTest {
             PlayingCard(TEN, SPADE)
         )
 
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldTwoStraightCardsAndATwoInTheMiddle() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(THREE, SPADE),
@@ -171,12 +182,12 @@ internal class FastMeldValidatorTest {
             PlayingCard(FIVE, SPADE)
         )
 
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldTwoStraightCardsAndAJokerInTheMiddle() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(THREE, SPADE),
@@ -184,12 +195,12 @@ internal class FastMeldValidatorTest {
             PlayingCard(FIVE, SPADE)
         )
 
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldNotBeAbleToMeldThreeNonConsecutiveCards() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(THREE, SPADE),
@@ -197,12 +208,12 @@ internal class FastMeldValidatorTest {
             PlayingCard(SEVEN, SPADE)
         )
 
-        assertFalse(meldValidator.isValid(meld))
+        assertFalse(Meld(meld).valid)
     }
 
     @Test
     fun shouldNotBeAbleToMeldThreeConsecutiveCardsDifferentSuites() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(THREE, SPADE),
@@ -210,24 +221,21 @@ internal class FastMeldValidatorTest {
             PlayingCard(FIVE, SPADE)
         )
 
-        assertFalse(meldValidator.isValid(meld))
+        assertFalse(Meld(meld).valid)
     }
 
     @Test
     fun shouldNotBeAbleToMeldTwoCards() {
-        val meldValidator = FastMeldValidator()
-
         val meld = listOf(
             PlayingCard(THREE, SPADE),
             PlayingCard(FOUR, SPADE)
         )
 
-        assertFalse(meldValidator.isValid(meld))
+        assertFalse(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldFourStraightCards() {
-        val meldValidator = FastMeldValidator()
 
         val meld = listOf(
             PlayingCard(THREE, SPADE),
@@ -235,12 +243,12 @@ internal class FastMeldValidatorTest {
             PlayingCard(FIVE, SPADE),
             PlayingCard(SIX, SPADE)
         )
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldTwoTwosSameSuite() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(THREE, SPADE),
@@ -248,33 +256,33 @@ internal class FastMeldValidatorTest {
             PlayingCard(TWO, SPADE)
         )
 
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldNotBeAbleToMeldTwoWildCards() {
-        val meldValidator = FastMeldValidator()
+
         val meld = listOf(PlayingCard(JOKER, SPADE), PlayingCard(TWO, SPADE), PlayingCard(FIVE, SPADE))
 
-        assertFalse(meldValidator.isValid(meld))
+        assertFalse(Meld(meld).valid)
     }
 
 
     @Test
     fun shouldBeAbleToMeldThreeCardsOfSameValue() {
-        val meldValidator = FastMeldValidator()
-
-        val meld = listOf(
-            PlayingCard(KING, HEART),
-            PlayingCard(KING, SPADE),
-            PlayingCard(KING, DIAMOND)
+        val meld = Meld(
+            listOf(
+                PlayingCard(KING, HEART),
+                PlayingCard(KING, SPADE),
+                PlayingCard(KING, DIAMOND)
+            )
         )
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(meld.valid)
     }
 
     @Test
     fun shouldBeAbleToMeldThreeCardsOfSameValue2() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(FIVE, HEART),
@@ -283,36 +291,36 @@ internal class FastMeldValidatorTest {
             PlayingCard(FIVE, DIAMOND),
             PlayingCard(FIVE, CLUB),
         )
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldThreeCardsOfSameValue3() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(TWO, HEART),
             PlayingCard(TEN, CLUB),
             PlayingCard(TEN, SPADE),
         )
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldThreeCardsOfSameValue4() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(JOKER),
             PlayingCard(TEN, CLUB),
             PlayingCard(TEN, SPADE),
         )
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
     @Test
     fun shouldBeAbleToMeldSequenceWithTwo() {
-        val meldValidator = FastMeldValidator()
+
 
         val meld = listOf(
             PlayingCard(FOUR, CLUB),
@@ -323,7 +331,7 @@ internal class FastMeldValidatorTest {
         )
 
         // 4♣, 6♣, 7♣, 8♣, 2♠
-        assertTrue(meldValidator.isValid(meld))
+        assertTrue(Meld(meld).valid)
     }
 
 
