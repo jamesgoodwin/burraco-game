@@ -66,7 +66,7 @@ data class Meld(val cards: List<PlayingCard>) {
     }
 
     private fun checkSequence(): Pair<List<PlayingCard>, Boolean> {
-        val cardsLeft = (regularCards + wildcards).toMutableList()
+        val cardsLeft: MutableList<PlayingCard> = (regularCards + wildcards).toMutableList()
 
         if (cardsLeft.size !in 3..14) return Pair(cardsLeft, false)
 
@@ -81,14 +81,18 @@ data class Meld(val cards: List<PlayingCard>) {
             if (nextCard.value.ordinal == previousCard.value.ordinal + 1) {
                 previousCard = nextCard
                 cardsBeingOrdered.add(nextCard)
-            } else if (nextCard.value.ordinal == previousCard.value.ordinal + 2
-                && !wildCardUsed && (meldCardValues.contains(JOKER) || meldCardValues.contains(TWO)) // todo - needs to be checked using cards left instead of all cards
-            ) {
+            } else if (oneCardGap(nextCard, previousCard) && !wildCardUsed && meldCardValues.contains(JOKER)) {
+                val joker = cardsLeft.first { it.value == JOKER }
                 wildCardUsed = true
                 previousCard = nextCard
+                cardsBeingOrdered.add(joker)
                 cardsBeingOrdered.add(nextCard)
-                // todo - need to add the wildcard used
-                cardsLeft.removeIf(wildcard)
+            } else if (oneCardGap(nextCard, previousCard) && !wildCardUsed && meldCardValues.contains(TWO)) {
+                val two = cardsLeft.first { it.value == TWO }
+                wildCardUsed = true
+                previousCard = nextCard
+                cardsBeingOrdered.add(two)
+                cardsBeingOrdered.add(nextCard)
             } else if (previousCard.value == THREE && nextCard.value == TWO) {
                 // two becomes a natural two, swap previous and next
                 cardsBeingOrdered.add(cardsBeingOrdered.indexOf(previousCard), nextCard)
@@ -104,4 +108,7 @@ data class Meld(val cards: List<PlayingCard>) {
 
         return Pair(cardsBeingOrdered.toList(), sequential)
     }
+
+    private fun oneCardGap(nextCard: PlayingCard, previousCard: PlayingCard) =
+        nextCard.value.ordinal == previousCard.value.ordinal + 2
 }

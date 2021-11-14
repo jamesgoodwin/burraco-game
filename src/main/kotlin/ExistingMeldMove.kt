@@ -1,15 +1,22 @@
 class ExistingMeldMove(
-    private val meldToExistingSummary: MeldAttempt,
+    private val meldAttempt: MeldAttempt,
     val state: State
 ) : MeldMove {
 
     override fun performMove(): Boolean {
-        TODO("Not yet implemented")
+        if (state.hand(state.playersTurn)?.containsAll(meldAttempt.handCardsUsed) != true) return false
+
+        val existingMeld = state.melds(state.playersTurn)?.get(meldAttempt.index)
+        existingMeld?.addAll(meldAttempt.handCardsUsed)
+        meldAttempt.handCardsUsed.forEach { card ->
+            state.hands[state.playersTurn]?.remove(card)
+        }
+        return true
     }
 
     override fun toString(): String {
-        val handCardsUsed = meldToExistingSummary.handCardsUsed.joinToString(",")
-        val existingMeld = meldToExistingSummary.existingMeld.joinToString(",")
+        val handCardsUsed = meldAttempt.handCardsUsed.joinToString(",")
+        val existingMeld = meldAttempt.existingMeld.joinToString(",")
         return "Add $handCardsUsed to existing meld: $existingMeld"
     }
 

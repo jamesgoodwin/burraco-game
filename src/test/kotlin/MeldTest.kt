@@ -78,4 +78,18 @@ internal class MeldTest {
         assertNotNull(meld.value)
         assertNull(meld.suit)
     }
+
+    @Test
+    fun isNotValidWithTwoWildcards() {
+        val meld = Meld(
+            listOf(
+                PlayingCard(JOKER),
+                PlayingCard(NINE, DIAMOND),
+                PlayingCard(JACK, DIAMOND),
+                PlayingCard(TWO, CLUB)
+            )
+        )
+        assertFalse(meld.valid)
+    }
+
 }

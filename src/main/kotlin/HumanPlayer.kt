@@ -33,7 +33,7 @@ class HumanPlayer(private val name: String) : Player {
         val meldsState = state.melds(this)?.map { cards -> Meld(cards) }
 
         val moves = if (handState != null && meldsState != null) {
-            meldMovesFinder.findMoves(handState, state, meldsState)
+            meldMovesFinder.getAllMoves(handState, state, meldsState)
         } else {
             null
         }
