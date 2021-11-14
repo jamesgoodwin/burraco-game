@@ -1,11 +1,11 @@
-import PlayingCard.Suit.*
-import PlayingCard.Value.*
 import org.junit.Ignore
 import org.junit.Test
+import PlayingCard.Suit.*
+import PlayingCard.Value.*
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-internal class MeldMovesFinderTest {
+internal class SequenceMeldMovesTest {
 
     private val state = State(listOf(HumanPlayer("bob"), HumanPlayer("sue")))
     private val meldMovesFinder = MeldMovesFinder()
@@ -13,9 +13,9 @@ internal class MeldMovesFinderTest {
     @Test
     fun shouldMeldNewSequence() {
         val hand = listOf(
-            PlayingCard(PlayingCard.Value.SIX, HEART),
+            PlayingCard(SIX, HEART),
             PlayingCard(SEVEN, HEART),
-            PlayingCard(PlayingCard.Value.EIGHT, HEART)
+            PlayingCard(EIGHT, HEART)
         )
         val melds = emptyList<Meld>()
         val moves = meldMovesFinder.getAllMoves(hand, state, melds)
@@ -25,10 +25,10 @@ internal class MeldMovesFinderTest {
     @Test
     fun shouldMeldNewSequenceWhenJokerFirst() {
         val hand = listOf(
-            PlayingCard(PlayingCard.Value.JOKER),
-            PlayingCard(PlayingCard.Value.EIGHT, DIAMOND),
-            PlayingCard(PlayingCard.Value.TEN, DIAMOND),
-            PlayingCard(PlayingCard.Value.KING, DIAMOND),
+            PlayingCard(JOKER),
+            PlayingCard(EIGHT, DIAMOND),
+            PlayingCard(TEN, DIAMOND),
+            PlayingCard(KING, DIAMOND),
             PlayingCard(ACE, DIAMOND)
         )
         val melds = emptyList<Meld>()
@@ -84,13 +84,10 @@ internal class MeldMovesFinderTest {
         assertTrue(moves.size == 5)
     }
 
-//    Hand: 10♥, 8♦, 9♣, 2♠
-//    Melds: 2♥, 10♥, 10♣, 10♠ - 3♥, 3♣, 3♣ - J♥, J♦, J♣ - 8♦, 8♣, 8♠
-
     @Test
     fun shouldMeldNewSequenceWithWildcard() {
         val hand = listOf(
-            PlayingCard(PlayingCard.Value.SIX, HEART),
+            PlayingCard(SIX, HEART),
             PlayingCard(SEVEN, HEART),
             PlayingCard(PlayingCard.Value.TWO, SPADE)
         )
@@ -99,64 +96,27 @@ internal class MeldMovesFinderTest {
         assertTrue(moves.isNotEmpty())
     }
 
-    @Test
-    fun shouldMeldNewCombination() {
-        val hand = mapOf(
-            SEVEN to
-                    listOf(
-                        PlayingCard(SEVEN, HEART),
-                        PlayingCard(SEVEN, HEART),
-                        PlayingCard(SEVEN, SPADE)
-                    )
-        )
-        val moves = meldMovesFinder.getNewCombinationMeldMoves(hand, emptyList(), state)
-        assertTrue(moves.isNotEmpty())
-    }
 
     @Test
-    fun shouldMeldToExistingCombination() {
-        val hand = listOf(PlayingCard(THREE, DIAMOND))
-
-        val melds = listOf(
-            Meld(
-                listOf(
-                    PlayingCard(THREE, HEART),
-                    PlayingCard(THREE, SPADE),
-                    PlayingCard(THREE, HEART)
-                )
-            )
-        )
-        val moves = meldMovesFinder.getAllMoves(hand, state, melds)
-        assertNotNull(moves)
-    }
-
-    //test - 10♥, Q♥, K♥, K♥, 8♦, 10♦, 4♣, 5♣, 5♣, 7♣, 9♣, 4♠, Q♠, Q♠, K♠
-
-//    T: 108, H: 17, M: 9, P:22, S:60, D:0
-//    Hand: 10♥, Q♥, K♥, K♥, 8♦, 10♦, 4♣, 5♣, 5♣, 7♣, 9♣, 4♠
-//    Melds: Q♠, Q♠, K♠
-//    Enter a card to discard
-
-    @Test
-    fun shouldMeldToExisting() {
+    fun shouldMeldToExistingSequence() {
         val hand = listOf(
-            PlayingCard(PlayingCard.Value.SIX, HEART),
-            PlayingCard(PlayingCard.Value.EIGHT, HEART),
-            PlayingCard(PlayingCard.Value.SIX, DIAMOND)
+            PlayingCard(SIX, HEART),
+            PlayingCard(EIGHT, HEART),
+            PlayingCard(SIX, DIAMOND)
         )
         val melds = listOf(
             Meld(
                 listOf(
                     PlayingCard(THREE, HEART),
-                    PlayingCard(PlayingCard.Value.FOUR, HEART),
-                    PlayingCard(PlayingCard.Value.FIVE, HEART)
+                    PlayingCard(FOUR, HEART),
+                    PlayingCard(FIVE, HEART)
                 )
             ),
             Meld(
                 listOf(
-                    PlayingCard(PlayingCard.Value.NINE, HEART),
-                    PlayingCard(PlayingCard.Value.TEN, HEART),
-                    PlayingCard(PlayingCard.Value.JACK, HEART)
+                    PlayingCard(NINE, HEART),
+                    PlayingCard(TEN, HEART),
+                    PlayingCard(JACK, HEART)
                 )
             )
         )
