@@ -32,14 +32,14 @@ class HumanPlayer(private val name: String) : Player {
         val handState = state.hand(this)
         val meldsState = state.melds(this)?.map { cards -> Meld(cards) }
 
-        val moves = if (handState != null && meldsState != null) {
-            meldMovesFinder.getAllMoves(handState, state, meldsState)
-        } else {
-            null
+        val moves = when {
+            (handState != null && meldsState != null) -> meldMovesFinder.getAllMoves(handState, state, meldsState)
+            handState != null -> meldMovesFinder.getAllMoves(handState, state, emptyList())
+            else -> null
         }
 
         println("Please choose an option:")
-        if(moves?.isNotEmpty() == true) {
+        if (moves?.isNotEmpty() == true) {
             println("1. to discard a card\n2. to meld cards")
         } else {
             println("1. to discard a card")
@@ -59,29 +59,12 @@ class HumanPlayer(private val name: String) : Player {
                         val move = moves?.get(meldIndex.toInt() - 1)
                         if (move != null && turn.meld(move)) {
                             state.printGameState(this)
-                            discardCardInput(state, turn)
+                            placeCardInput(state, turn)
                         } else {
                             println("Error")
                             placeCardInput(state, turn)
                         }
                     }
-
-//                        readLine().let { cards ->
-//                            val hand = state.hand(this)?.sorted()
-//                            val result = cards?.split(",")
-//                                ?.map { index -> Integer.valueOf(index) - 1 }
-//                                ?.mapNotNull { index -> hand?.elementAt(index) }
-//                            if (result != null) {
-//                                if (turn.meld(result, 0)) {
-//                                    state.printGameState(this)
-//                                    discardCardInput(state, turn)
-//                                } else {
-//                                    println("Error")
-//                                    placeCardInput(state, turn)
-//                                }
-//                            }
-//                        }
-
                 }
                 else -> {
                     println("Error")

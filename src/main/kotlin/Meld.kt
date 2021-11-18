@@ -81,15 +81,17 @@ data class Meld(val cards: List<PlayingCard>) {
             if (nextCard.value.ordinal == previousCard.value.ordinal + 1) {
                 previousCard = nextCard
                 cardsBeingOrdered.add(nextCard)
-            } else if (oneCardGap(nextCard, previousCard) && !wildCardUsed && meldCardValues.contains(JOKER)) {
+            } else if (oneCardGap(nextCard, previousCard) && !wildCardUsed && cardsLeft.any { it.value == JOKER }) {
                 val joker = cardsLeft.first { it.value == JOKER }
+                cardsLeft.remove(joker)
                 wildCardUsed = true
                 previousCard = nextCard
                 cardsBeingOrdered.add(joker)
                 cardsBeingOrdered.add(nextCard)
-            } else if (oneCardGap(nextCard, previousCard) && !wildCardUsed && meldCardValues.contains(TWO)) {
+            } else if (oneCardGap(nextCard, previousCard) && !wildCardUsed && cardsLeft.any { it.value == TWO }) {
                 val two = cardsLeft.first { it.value == TWO }
                 wildCardUsed = true
+                cardsLeft.remove(two)
                 previousCard = nextCard
                 cardsBeingOrdered.add(two)
                 cardsBeingOrdered.add(nextCard)

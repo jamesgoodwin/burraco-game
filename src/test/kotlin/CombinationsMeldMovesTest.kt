@@ -1,6 +1,7 @@
 import PlayingCard.Suit.*
 import PlayingCard.Value.*
 import org.junit.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -27,6 +28,22 @@ internal class CombinationsMeldMovesTest {
     }
 
     @Test
+    fun shouldMeldNewCombinationWithWildcard() {
+        val twoOfDiamonds = PlayingCard(TWO, DIAMOND)
+        val hand = mapOf(
+            SEVEN to
+                    listOf(
+                        PlayingCard(SEVEN, HEART),
+                        PlayingCard(SEVEN, HEART),
+                        PlayingCard(SEVEN, SPADE)
+                    ),
+            TWO to listOf(twoOfDiamonds)
+        )
+        val moves = meldMovesFinder.getNewCombinationMeldMoves(hand, listOf(twoOfDiamonds), state)
+        assertTrue(moves.isNotEmpty())
+    }
+
+    @Test
     fun shouldMeldToExistingCombination() {
         val hand = listOf(PlayingCard(THREE, DIAMOND))
 
@@ -40,7 +57,7 @@ internal class CombinationsMeldMovesTest {
             )
         )
         val moves = meldMovesFinder.getAllMoves(hand, state, melds)
-        assertNotNull(moves)
+        assertEquals(moves.size, 1)
     }
 
     //test - 10♥, Q♥, K♥, K♥, 8♦, 10♦, 4♣, 5♣, 5♣, 7♣, 9♣, 4♠, Q♠, Q♠, K♠
