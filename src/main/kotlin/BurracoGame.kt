@@ -3,12 +3,13 @@ import java.lang.RuntimeException
 import kotlin.collections.ArrayDeque
 import kotlin.collections.ArrayList
 
-class BurracoGame(var state: State = State(
-    listOf(
-        HumanPlayer("1"),
-        LowAiPlayer(meldEvaluator = HandEvaluator())
+class BurracoGame(
+    var state: State = State(
+        listOf(
+            HumanPlayer("1"),
+            LowAiPlayer(meldEvaluator = HandEvaluator())
+        )
     )
-)
 ) {
 
     init {
@@ -21,6 +22,11 @@ class BurracoGame(var state: State = State(
             println("--- Player ($name) turn ---")
             state.printGameState(state.playersTurn)
             state.playersTurn.takeTurn(state, StateBasedPlayerTurn(state))
+
+            if(state.playerClosed(state.playersTurn)) {
+                state.finished = true
+            }
+            // todo - finish the game if less cards in the deck than full player rounds
             nextPlayer()
         }
     }

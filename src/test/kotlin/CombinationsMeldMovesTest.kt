@@ -2,7 +2,6 @@ import PlayingCard.Suit.*
 import PlayingCard.Value.*
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 internal class CombinationsMeldMovesTest {
@@ -58,6 +57,23 @@ internal class CombinationsMeldMovesTest {
         )
         val moves = meldMovesFinder.getAllMoves(hand, state, melds)
         assertEquals(moves.size, 1)
+    }
+
+    @Test
+    fun shouldMeldJokerToExistingCombination() {
+        val hand = listOf(PlayingCard(JOKER))
+
+        val melds = listOf(
+            Meld(
+                listOf(
+                    PlayingCard(NINE, DIAMOND),
+                    PlayingCard(NINE, CLUB),
+                    PlayingCard(NINE, CLUB)
+                )
+            )
+        )
+        val moves = meldMovesFinder.getAllMoves(hand, state, melds)
+        assertEquals(1, moves.size)
     }
 
     //test - 10♥, Q♥, K♥, K♥, 8♦, 10♦, 4♣, 5♣, 5♣, 7♣, 9♣, 4♠, Q♠, Q♠, K♠

@@ -19,7 +19,7 @@ class State(val players: List<Player>) {
         println("T: $totalCards, H: $cardsInHands, M: $cardsInMelds, P:$cardsInPot, S:${stock.size}, D:${discard.size}")
     }
 
-    fun printPile() {
+    private fun printPile() {
         if (discard.isNotEmpty()) {
             val cards = discard.joinToString(", ")
             println("Discard pile: $cards")
@@ -34,7 +34,7 @@ class State(val players: List<Player>) {
         }
     }
 
-    fun printHand(player: Player) {
+    private fun printHand(player: Player) {
         val cards = hand(player)?.sorted()
         val hand = cards?.joinToString(", ")
         println("Hand: $hand")
@@ -44,6 +44,27 @@ class State(val players: List<Player>) {
         printPile()
         printHand(player)
         printMelds(player)
+    }
+
+    fun hasBurraco(player: Player): Boolean {
+        return melds[player]?.any { it.size >= 7 } == true
+    }
+
+    fun playerClosed(player: Player): Boolean {
+        return pots[player]?.isEmpty() == true && hands[player]?.isEmpty() == true && hasBurraco(player)
+    }
+
+    fun burracos(player: Player): List<Burraco> {
+        val melds = melds[player]?.filter { it.size >= 7 }
+
+        melds?.forEach {
+//            val meld = Meld(it)
+//            if(meld.wildcards.isEmpty()) {
+//                // pulito
+//            } else
+        }
+
+        return emptyList()
     }
 
     var finished: Boolean = false
@@ -56,4 +77,8 @@ class State(val players: List<Player>) {
     var discard = mutableListOf<PlayingCard>()
     val pots: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
 
+}
+
+enum class Burraco(points: Int) {
+    PULITO(200), SPORCO(100), SEMI_PULITO(150)
 }

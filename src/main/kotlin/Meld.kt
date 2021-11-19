@@ -9,10 +9,10 @@ data class Meld(val cards: List<PlayingCard>) {
     private val meldCardValues = cards.map { it.value }
 
     val valid: Boolean
-    private val cardsOrdered: List<PlayingCard>
+    val cardsOrdered: List<PlayingCard>
 
-    private val regularCards = cards.filterNot(wildcard).sorted()
-    private val wildcards = cards.filter(wildcard)
+    val regularCards = cards.filterNot(wildcard).sorted()
+    val wildcards = cards.filter(wildcard)
 
     init {
         var (meldSuit, meldValue: PlayingCard.Value?) = checkSuitAndValue()

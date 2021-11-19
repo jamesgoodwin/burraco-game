@@ -60,23 +60,25 @@ class MeldMovesFinder {
     ): List<MeldMove> {
         val meldsByValue = melds.groupBy { it.value }
 
-        return handByValue.map { handCards ->
-            var allCombinations: MutableList<Triple<Int, List<PlayingCard>, List<PlayingCard>>>? = mutableListOf()
-            meldsByValue[handCards.key]?.forEach {
-                val index = melds.indexOf(it)
-                allCombinations?.add(Triple(index, handCards.value, it.cards))
+        return meldsByValue.map { meldCards ->
+            val allCombinations = mutableListOf<Triple<Int, List<PlayingCard>, List<PlayingCard>>>()
+
+            meldCards.value.forEach { meld ->
+                val index = melds.indexOf(meld)
+
+                val handMatchingMeld = handByValue[meldCards.key]
+                if (handMatchingMeld != null) {
+                    allCombinations.add(Triple(index, handMatchingMeld, meld.cards))
+                }
+
                 if (wildcards.isNotEmpty()) {
                     wildcards.forEach { wildcard ->
-                        val cardsUsed = handCards.value.toMutableList()
-                        cardsUsed.add(wildcard)
-                        allCombinations?.add(Triple(index, cardsUsed, it.cards))
+                        allCombinations.add(Triple(index, listOf(wildcard), meld.cards))
                     }
                 }
             }
-            if (allCombinations?.isEmpty() == true) allCombinations = null
             allCombinations
-        }.filterNotNull()
-            .flatten()
+        }.flatten()
             .map {
                 MeldAttempt(it.first, it.second, it.third)
             }
@@ -160,9 +162,9 @@ class MeldMovesFinder {
     ): List<MeldAttempt> {
         val windows = mutableListOf(listOf(listOf<PlayingCard>()))
 
-        if (values.third.isNotEmpty()) {
+        if (values.third.isNotEmpty()) { //existing
             windows.addAll(getWindowsWithExistingMeld(values))
-        } else if (values.second.isNotEmpty()) {
+        } else if (values.second.isNotEmpty()) { //new
             windows.addAll(getWindowsWithNewMeld(values.second, wildcards))
         }
         return windows.flatten()
@@ -189,7 +191,7 @@ class MeldMovesFinder {
 
         for (i in hand.size downTo minSize) {
             val handWindows = hand.windowed(i)
-            if(i >= 3) windows.add(handWindows) // only add windows of 3 or greater as can be 2 if a wildcard
+            if (i >= 3) windows.add(handWindows) // only add windows of 3 or greater as can be 2 if a wildcard
 
             if (wildcards.isNotEmpty()) {
                 wildcards.forEach { wc ->
@@ -208,7 +210,8 @@ class MeldMovesFinder {
     private fun getWindowsWithExistingMeld(
         values: Triple<Int, List<PlayingCard>, List<PlayingCard>>
     ): Collection<List<List<PlayingCard>>> {
-        val allCards = (values.second + values.third).sorted()
+        val handWildcards = values.second.filter { it.wildcard }
+        val allCards = (values.third.union(values.second) + handWildcards).sorted()
         val firstCardIndex = allCards.indexOf(values.third.first())
         val lastCardIndex = allCards.indexOf(values.third.last())
 
@@ -219,7 +222,7 @@ class MeldMovesFinder {
             val fromIndex = max(0, firstCardIndex - maxSearchDistance)
             val toIndex = min(allCards.size, lastCardIndex + maxSearchDistance + 1)
 
-            if(fromIndex < toIndex) {
+            if (fromIndex < toIndex) {
                 val subList = allCards.subList(fromIndex, toIndex)
                 windows.add(subList.windowed(i))
             }

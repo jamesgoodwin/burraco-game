@@ -29,8 +29,22 @@ internal class SequenceMeldMovesTest {
         )
 
         val melds = listOf(
-            Meld(listOf(PlayingCard(TWO, HEART), PlayingCard(TEN, HEART), PlayingCard(TEN, CLUB), PlayingCard(TEN, SPADE))),
-            Meld(listOf(PlayingCard(ACE, HEART), PlayingCard(ACE, DIAMOND), PlayingCard(ACE, SPADE), PlayingCard(ACE, SPADE))),
+            Meld(
+                listOf(
+                    PlayingCard(TWO, HEART),
+                    PlayingCard(TEN, HEART),
+                    PlayingCard(TEN, CLUB),
+                    PlayingCard(TEN, SPADE)
+                )
+            ),
+            Meld(
+                listOf(
+                    PlayingCard(ACE, HEART),
+                    PlayingCard(ACE, DIAMOND),
+                    PlayingCard(ACE, SPADE),
+                    PlayingCard(ACE, SPADE)
+                )
+            ),
             Meld(listOf(PlayingCard(SIX, CLUB), PlayingCard(SEVEN, CLUB), PlayingCard(EIGHT, CLUB)))
         )
         val moves = meldMovesFinder.getAllMoves(hand, state, melds)
@@ -118,6 +132,29 @@ internal class SequenceMeldMovesTest {
     }
 
     // todo test for 2. Add Joker to existing meld: Q♥,A♥,K♥,2♦
+
+    // todo test for Add ten to existing meld - Hand: 10♥, Q♥, K♣, A♠
+    //Melds: Q♥, K♥, A♥, 2♦
+
+    @Test
+    fun shouldAddToExistingMeldWithWildcard() {
+        val hand = listOf(
+            PlayingCard(TEN, HEART),
+            PlayingCard(QUEEN, HEART)
+        )
+        val melds = listOf(
+            Meld(
+                listOf(
+                    PlayingCard(QUEEN, HEART),
+                    PlayingCard(KING, HEART),
+                    PlayingCard(ACE, HEART),
+                    PlayingCard(TWO, DIAMOND)
+                )
+            )
+        )
+        val moves = meldMovesFinder.getAllMoves(hand, state, melds)
+        assertEquals(1, moves.size)
+    }
 
     @Test
     fun shouldMeldNewSequenceWithJokerAtEnd() {
