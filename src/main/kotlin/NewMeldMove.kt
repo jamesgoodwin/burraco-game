@@ -17,7 +17,7 @@ class NewMeldMove(val meld: Meld, val state: State) : MeldMove {
     }
 
     override fun toString(): String {
-        return "Meld " + meld.cards.joinToString(",")
+        return "Meld $meld"
     }
 
 }

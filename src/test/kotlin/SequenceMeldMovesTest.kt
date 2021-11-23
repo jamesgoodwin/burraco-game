@@ -64,7 +64,7 @@ internal class SequenceMeldMovesTest {
         )
 
         val moves = meldMovesFinder.getAllMoves(hand, state, emptyList())
-        assertEquals(4, moves.size)
+        assertEquals(moves.size, 4)
     }
 
     @Test
@@ -82,7 +82,7 @@ internal class SequenceMeldMovesTest {
             PlayingCard(QUEEN, SPADE),
         )
         val moves = meldMovesFinder.getAllMoves(hand, state, emptyList())
-        assertEquals(moves.size, 6)
+        assertEquals(6, moves.size)
     }
 
 //    3♥, 5♥, J♥, Q♥, 8♦, 3♣, 5♠, Q♠, K♠, A♠

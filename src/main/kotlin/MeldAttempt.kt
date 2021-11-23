@@ -3,9 +3,4 @@ data class MeldAttempt(
     var handCardsUsed: List<PlayingCard> = emptyList(),
     val existingMeld: List<PlayingCard> = emptyList(),
     val meldCombo: List<PlayingCard> = emptyList()
-) {
-    var wildCardUsed: Boolean = false
-    var sequential: Boolean? = null
-    var previousCard: PlayingCard? = null
-
-}
+)
