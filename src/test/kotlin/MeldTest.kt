@@ -20,6 +20,18 @@ internal class MeldTest {
     }
 
     @Test
+    fun isValidJackQueenJoker() {
+        val meld = Meld(
+            listOf(
+                PlayingCard(JACK, SPADE),
+                PlayingCard(QUEEN, SPADE),
+                PlayingCard(JOKER)
+            )
+        )
+        assertTrue(meld.valid)
+    }
+
+    @Test
     fun isValidWithWildcardInMiddle() {
         val meld = Meld(
             listOf(

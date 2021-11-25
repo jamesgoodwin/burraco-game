@@ -41,35 +41,51 @@ data class Meld(val cards: List<PlayingCard>) {
 
     private fun checkSequence(): Pair<List<PlayingCard>, Boolean> {
         val aceToBeUsed = regularCards.singleOrNull { it.value == ACE }
-        val wildCardsToBeUsed = wildcards.toMutableList()
+        val wildCardsToBeUsed : MutableList<PlayingCard> = wildcards.toMutableList()
 
         val cardsBeingOrdered: MutableList<PlayingCard> = regularCards.toMutableList()
         cardsBeingOrdered.remove(aceToBeUsed)
         cardsBeingOrdered.sort()
 
-        val gapIndex = gapIndex(cardsBeingOrdered)
-        val naturalTwo = PlayingCard(TWO, suit)
+        val gapIndex = if (cardsBeingOrdered.isNotEmpty()) gapIndex(cardsBeingOrdered) else -1
+        var wildCardUsed = false
+        var naturalTwoUsed = false
 
+        // 3 .. King
         if (gapIndex > 0 && wildCardsToBeUsed.isNotEmpty()) {
             val wildcard = getWildcardNormalPreferred(wildCardsToBeUsed)
             if (wildcard != null) {
                 cardsBeingOrdered.add(gapIndex, wildcard)
                 wildCardsToBeUsed.remove(wildcard)
+                wildCardUsed = true
             }
         }
 
-        addAces(aceToBeUsed, cardsBeingOrdered, wildCardsToBeUsed)
+        // fill in aces and wildcard if required
+        naturalTwoUsed = addAces(aceToBeUsed, cardsBeingOrdered, wildCardsToBeUsed)
 
-        if (wildCardsToBeUsed.isNotEmpty()) {
-            if (wildCardsToBeUsed.contains(naturalTwo) && cardsBeingOrdered.first() == PlayingCard(THREE, suit)) {
-                cardsBeingOrdered.add(0, naturalTwo)
-                wildCardsToBeUsed.remove(naturalTwo)
+        val wildcardToBeUsedAsNaturalTwo = cardsBeingOrdered.first().value == THREE
+        if (wildCardsToBeUsed.isNotEmpty() && (!wildCardUsed || (wildcardToBeUsedAsNaturalTwo && !naturalTwoUsed))) {
+            val wildcard : Pair<Boolean, PlayingCard>? = getWildcardNaturalPreferred(wildCardsToBeUsed)
+            if (wildcard != null) {
+                cardsBeingOrdered.add(0, wildcard.second)
+                wildCardsToBeUsed.remove(wildcard.second)
+                if(wildcard.first && wildcardToBeUsedAsNaturalTwo) naturalTwoUsed = true else wildCardUsed = true
+            }
+        }
+
+        // check if wildcard used and not a natural two
+        if (wildCardsToBeUsed.isNotEmpty() && (!wildCardUsed || (wildcardToBeUsedAsNaturalTwo && !naturalTwoUsed))) {
+            val wildcard = getWildcardNaturalPreferred(wildCardsToBeUsed)
+            if (wildcard != null) {
+                cardsBeingOrdered.add(0, wildcard.second)
+                wildCardsToBeUsed.remove(wildcard.second)
             }
         }
 
         if (cardsBeingOrdered.size !in 3..14) return Pair(cardsBeingOrdered, false)
 
-        return Pair(cardsBeingOrdered.toList(), gapIndex(cardsBeingOrdered) == -1)
+        return Pair(cardsBeingOrdered.toList(), gapIndex(cardsBeingOrdered) == -1 && wildCardsToBeUsed.isEmpty())
     }
 
     private fun checkSuitAndValue(): Pair<PlayingCard.Suit?, PlayingCard.Value?> {
@@ -97,26 +113,36 @@ data class Meld(val cards: List<PlayingCard>) {
     private fun addAces(
         aceToBeUsed: PlayingCard?,
         cardsBeingOrdered: MutableList<PlayingCard>,
-        wildCardsToBeUsed: MutableList<PlayingCard>
-    ) {
+        wildCardsToBeUsed: MutableList<PlayingCard>,
+    ): Boolean {
+        var naturalTwoWildcardUsed = false
         if (aceToBeUsed != null) {
             if (cardsBeingOrdered.contains(PlayingCard(KING, suit))) {
                 cardsBeingOrdered.add(aceToBeUsed)
             } else {
-                if (cardsBeingOrdered.first() == PlayingCard(THREE, suit) && wildCardsToBeUsed.isNotEmpty()) {
-                    getWildcardNaturalPreferred(wildCardsToBeUsed)?.let {
+                if (cardsBeingOrdered.firstOrNull() == PlayingCard(THREE, suit) && wildCardsToBeUsed.isNotEmpty()) {
+                    val wildcard = getWildcardNaturalPreferred(wildCardsToBeUsed)
+                    if (wildcard != null) {
                         cardsBeingOrdered.add(0, aceToBeUsed)
-                        cardsBeingOrdered.add(1, it)
+                        cardsBeingOrdered.add(1, wildcard.second)
+                        wildCardsToBeUsed.remove(wildcard.second)
+                        naturalTwoWildcardUsed = true
                     }
-                } else if (cardsBeingOrdered.last() == PlayingCard(QUEEN, suit) && wildCardsToBeUsed.isNotEmpty()) {
+                } else if (cardsBeingOrdered.lastOrNull() == PlayingCard(QUEEN,
+                        suit) && wildCardsToBeUsed.isNotEmpty()
+                ) {
                     val wildcard = getWildcardNormalPreferred(wildCardsToBeUsed)
                     if (wildcard != null) {
                         cardsBeingOrdered.add(wildcard)
+                        wildCardsToBeUsed.remove(wildcard)
                     }
                     cardsBeingOrdered.add(PlayingCard(QUEEN, suit))
+                } else {
+                    cardsBeingOrdered.add(aceToBeUsed)
                 }
             }
         }
+        return naturalTwoWildcardUsed
     }
 
     private fun getWildcardNormalPreferred(wildcards: MutableList<PlayingCard>): PlayingCard? {
@@ -132,15 +158,15 @@ data class Meld(val cards: List<PlayingCard>) {
         return null
     }
 
-    private fun getWildcardNaturalPreferred(wildcards: MutableList<PlayingCard>): PlayingCard? {
+    private fun getWildcardNaturalPreferred(wildcards: MutableList<PlayingCard>): Pair<Boolean, PlayingCard>? {
         val naturalTwo = PlayingCard(TWO, suit)
         if (wildcards.contains(naturalTwo)) {
-            return naturalTwo
+            return Pair(true, naturalTwo)
         }
 
         val normalWildcard = wildcards.singleOrNull { it != naturalTwo }
         if (normalWildcard != null) {
-            return normalWildcard
+            return Pair(false, normalWildcard)
         }
         return null
     }
@@ -150,10 +176,15 @@ data class Meld(val cards: List<PlayingCard>) {
         cardsBeingOrdered.minus(previous).forEach {
             if (it.value.ordinal != previous.value.ordinal + 1) {
                 if (it.value == JOKER || it.value == TWO) {
-                    val nextValue = PlayingCard.Value.from(previous.value.order + 1)
+                    // check if natural two or wildcard to determine correct value in the sequence
+                    val nextValue = if (previous.value == TWO) {
+                        TWO
+                    } else PlayingCard.Value.from(previous.value.order + 1)
                     if (nextValue != null) {
                         previous = PlayingCard(nextValue, previous.suit)
                     }
+                } else if (previous.value == JOKER || previous.value == TWO) {
+                    previous = it
                 } else return cardsBeingOrdered.indexOf(it)
             } else previous = it
         }

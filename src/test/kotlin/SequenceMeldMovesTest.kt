@@ -64,7 +64,7 @@ internal class SequenceMeldMovesTest {
         )
 
         val moves = meldMovesFinder.getAllMoves(hand, state, emptyList())
-        assertEquals(moves.size, 4)
+        assertEquals(4, moves.size)
     }
 
     @Test
@@ -254,5 +254,29 @@ internal class SequenceMeldMovesTest {
         val moves = meldMovesFinder.getMeldToExistingSequenceMoves(hand, listOf(twoOfDiamonds), melds, state)
         assertNotNull(moves)
     }
+
+    @Test
+    fun shouldNotMeldWildcardToExistingSequenceWithWildcard() {
+        val twoOfHearts = PlayingCard(TWO, HEART)
+        val hand = mapOf<PlayingCard.Suit?, List<PlayingCard>>(
+            HEART to listOf(twoOfHearts)
+        )
+
+        val melds = listOf(
+            Meld(
+                listOf(
+                    PlayingCard(FIVE, CLUB),
+                    PlayingCard(ACE, CLUB),
+                    PlayingCard(FOUR, CLUB),
+                    PlayingCard(THREE, CLUB),
+                    PlayingCard(JOKER)
+                )
+            )
+        )
+        val moves = meldMovesFinder.getMeldToExistingSequenceMoves(hand, listOf(twoOfHearts), melds, state)
+        assertEquals(0, moves.size)
+    }
+
+//    2♥ to existing meld: 5♣,A♣,4♣,3♣,Joker
 
 }
