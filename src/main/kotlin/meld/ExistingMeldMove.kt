@@ -1,3 +1,8 @@
+package meld
+
+import MeldMove
+import State
+
 class ExistingMeldMove(
     private val meldAttempt: MeldAttempt,
     val state: State

@@ -1,3 +1,8 @@
+package player
+
+import meld.MeldEvaluator
+import State
+
 class LowAiPlayer(val meldEvaluator: MeldEvaluator) : Player {
 
     override fun takeTurn(state: State, turn: PlayerTurn) {
@@ -8,8 +13,9 @@ class LowAiPlayer(val meldEvaluator: MeldEvaluator) : Player {
         }
 
         state.hand(this)?.let { cards ->
-            meldEvaluator.getMelds(cards).forEach { meld ->
-                turn.meld(meld)
+            val melds = meldEvaluator.getMelds(cards)
+            if (melds.isNotEmpty()) {
+                turn.meld(melds.first())
             }
             state.printMelds(this)
         }

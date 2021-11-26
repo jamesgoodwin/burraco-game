@@ -1,5 +1,6 @@
 import PlayingCard.Suit.*
 import PlayingCard.Value.*
+import meld.Meld
 import org.junit.Test
 import kotlin.test.*
 
@@ -85,10 +86,10 @@ internal class MeldTest {
     }
 
 //    Choose cards to meld
-//    1. Meld 3♣,3♣,5♣,6♣,7♣
-//    2. Meld 3♣,3♣,5♣,6♣
-//    3. Meld 3♣,3♣,5♣
-//    4. Meld 5♣,6♣,7♣
+//    1. meld.Meld 3♣,3♣,5♣,6♣,7♣
+//    2. meld.Meld 3♣,3♣,5♣,6♣
+//    3. meld.Meld 3♣,3♣,5♣
+//    4. meld.Meld 5♣,6♣,7♣
 
     @Test
     fun isAllSameValueWithJokerWildcard() {

@@ -1,6 +1,9 @@
 import org.junit.Test
 import PlayingCard.Suit.*
 import PlayingCard.Value.*
+import meld.Meld
+import meld.MeldMovesFinder
+import player.HumanPlayer
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -279,4 +282,33 @@ internal class SequenceMeldMovesTest {
 
 //    2♥ to existing meld: 5♣,A♣,4♣,3♣,Joker
 
+    @Test
+    fun shouldAddCardToMiddleOfExistingSequenceWithWildcard() {
+        val hand = mapOf<PlayingCard.Suit?, List<PlayingCard>>(
+            HEART to listOf(PlayingCard(FIVE, HEART),
+                PlayingCard(FIVE, HEART),
+                PlayingCard(SIX, HEART),
+                PlayingCard(NINE, HEART),
+                PlayingCard(QUEEN, HEART))
+        )
+
+        val melds = listOf(
+            Meld(
+                listOf(
+                    PlayingCard(TWO, HEART),
+                    PlayingCard(SEVEN, HEART),
+                    PlayingCard(EIGHT, HEART),
+                    PlayingCard(TEN, HEART),
+                    PlayingCard(JACK, HEART),
+                    PlayingCard(QUEEN, HEART),
+                    PlayingCard(KING, HEART),
+                )
+            )
+        )
+        val moves = meldMovesFinder.getMeldToExistingSequenceMoves(hand, emptyList(), melds, state)
+        assertEquals(1, moves.size)
+    }
+
+//    Hand: 5♥, 5♥, 6♥, 9♥, Q♥
+//    Melds: 2♥, 7♥, 8♥, 10♥, J♥, Q♥, K♥
 }

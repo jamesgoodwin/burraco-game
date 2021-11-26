@@ -2,6 +2,9 @@ import org.junit.Ignore
 import org.junit.Test
 import PlayingCard.Suit.*
 import PlayingCard.Value.*
+import meld.Meld
+import meld.MeldMovesFinder
+import player.HumanPlayer
 import kotlin.test.assertTrue
 
 internal class MeldMovesFinderTest {

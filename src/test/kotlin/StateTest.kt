@@ -2,6 +2,7 @@ import PlayingCard.Suit.SPADE
 import PlayingCard.Value.ACE
 import org.junit.Ignore
 import org.junit.Test
+import player.HumanPlayer
 import kotlin.test.assertTrue
 
 internal class StateTest {
@@ -20,7 +21,6 @@ internal class StateTest {
     }
 
     @Test
-    @Ignore
     fun shouldHaveBurraco() {
         val bill = HumanPlayer("bill")
         val state = State(listOf(bill, HumanPlayer("bob")))

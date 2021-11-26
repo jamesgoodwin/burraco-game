@@ -1,3 +1,9 @@
+package player
+
+import meld.Meld
+import meld.MeldMovesFinder
+import State
+
 class HumanPlayer(private val name: String) : Player {
 
     private val meldMovesFinder = MeldMovesFinder()

@@ -1,3 +1,5 @@
+import meld.Meld
+
 interface MeldMove : Move
 
 class NewMeldMove(val meld: Meld, val state: State) : MeldMove {
@@ -17,7 +19,7 @@ class NewMeldMove(val meld: Meld, val state: State) : MeldMove {
     }
 
     override fun toString(): String {
-        return "Meld $meld"
+        return "meld.Meld $meld"
     }
 
 }

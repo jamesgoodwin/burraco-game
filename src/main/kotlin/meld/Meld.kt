@@ -1,4 +1,9 @@
+package meld
+
+import Burraco
+import PlayingCard
 import PlayingCard.Value.*
+import com.sun.org.apache.xpath.internal.operations.Bool
 
 data class Meld(val cards: List<PlayingCard>) {
 
@@ -8,9 +13,11 @@ data class Meld(val cards: List<PlayingCard>) {
 
     val valid: Boolean
     val cardsOrdered: List<PlayingCard>
+    var wildcardIndex = -1
 
     private val regularCards = cards.filterNot(wildcard).sorted()
     private val wildcards = cards.filter(wildcard)
+
 
     init {
         var (meldSuit, meldValue: PlayingCard.Value?) = checkSuitAndValue()
@@ -41,7 +48,7 @@ data class Meld(val cards: List<PlayingCard>) {
 
     private fun checkSequence(): Pair<List<PlayingCard>, Boolean> {
         val aceToBeUsed = regularCards.singleOrNull { it.value == ACE }
-        val wildCardsToBeUsed : MutableList<PlayingCard> = wildcards.toMutableList()
+        val wildCardsToBeUsed: MutableList<PlayingCard> = wildcards.toMutableList()
 
         val cardsBeingOrdered: MutableList<PlayingCard> = regularCards.toMutableList()
         cardsBeingOrdered.remove(aceToBeUsed)
@@ -55,6 +62,7 @@ data class Meld(val cards: List<PlayingCard>) {
         if (gapIndex > 0 && wildCardsToBeUsed.isNotEmpty()) {
             val wildcard = getWildcardNormalPreferred(wildCardsToBeUsed)
             if (wildcard != null) {
+                wildcardIndex = gapIndex
                 cardsBeingOrdered.add(gapIndex, wildcard)
                 wildCardsToBeUsed.remove(wildcard)
                 wildCardUsed = true
@@ -66,11 +74,14 @@ data class Meld(val cards: List<PlayingCard>) {
 
         val wildcardToBeUsedAsNaturalTwo = cardsBeingOrdered.first().value == THREE
         if (wildCardsToBeUsed.isNotEmpty() && (!wildCardUsed || (wildcardToBeUsedAsNaturalTwo && !naturalTwoUsed))) {
-            val wildcard : Pair<Boolean, PlayingCard>? = getWildcardNaturalPreferred(wildCardsToBeUsed)
+            val wildcard: Pair<Boolean, PlayingCard>? = getWildcardNaturalPreferred(wildCardsToBeUsed)
             if (wildcard != null) {
+                if (!wildcardToBeUsedAsNaturalTwo) {
+                    wildcardIndex = 0
+                }
                 cardsBeingOrdered.add(0, wildcard.second)
                 wildCardsToBeUsed.remove(wildcard.second)
-                if(wildcard.first && wildcardToBeUsedAsNaturalTwo) naturalTwoUsed = true else wildCardUsed = true
+                if (wildcard.first && wildcardToBeUsedAsNaturalTwo) naturalTwoUsed = true else wildCardUsed = true
             }
         }
 
@@ -125,6 +136,7 @@ data class Meld(val cards: List<PlayingCard>) {
                     if (wildcard != null) {
                         cardsBeingOrdered.add(0, aceToBeUsed)
                         cardsBeingOrdered.add(1, wildcard.second)
+                        wildcardIndex = 1
                         wildCardsToBeUsed.remove(wildcard.second)
                         naturalTwoWildcardUsed = true
                     }
@@ -135,6 +147,7 @@ data class Meld(val cards: List<PlayingCard>) {
                     if (wildcard != null) {
                         cardsBeingOrdered.add(wildcard)
                         wildCardsToBeUsed.remove(wildcard)
+                        wildcardIndex = cardsBeingOrdered.indexOf(wildcard)
                     }
                     cardsBeingOrdered.add(PlayingCard(QUEEN, suit))
                 } else {
@@ -143,6 +156,20 @@ data class Meld(val cards: List<PlayingCard>) {
             }
         }
         return naturalTwoWildcardUsed
+    }
+
+    fun getBurracoType(): Burraco {
+        if (wildcardIndex == -1 && cardsOrdered.size >= 7) return Burraco.PULITO
+
+        val cardsAboveOrBelowWildcard =
+            if (wildcardIndex > cardsOrdered.size / 2) wildcardIndex
+            else cardsOrdered.size - (wildcardIndex + 1)
+
+        return when {
+            cardsAboveOrBelowWildcard >= 7 -> Burraco.SEMI_PULITO
+            cardsOrdered.size >= 7 -> Burraco.SPORCO
+            else -> Burraco.NO_BURRACO
+        }
     }
 
     private fun getWildcardNormalPreferred(wildcards: MutableList<PlayingCard>): PlayingCard? {

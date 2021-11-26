@@ -1,6 +1,9 @@
 import PlayingCard.Suit.*
 import PlayingCard.Value.*
+import meld.Meld
+import meld.MeldMovesFinder
 import org.junit.Test
+import player.HumanPlayer
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

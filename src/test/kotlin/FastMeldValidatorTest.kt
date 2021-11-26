@@ -1,15 +1,16 @@
 import PlayingCard.Suit.*
 import PlayingCard.Value.*
+import meld.Meld
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 internal class FastMeldValidatorTest {
 
-//    1. Meld A♥,K♥,K♥,5♥
-//    2. Meld A♥,K♥,K♥
-//    3. Meld A♣,9♣,K♣,8♣,K♣,10♣
-//    4. Meld A♣,9♣,K♣,8♣,K♣
+//    1. meld.Meld A♥,K♥,K♥,5♥
+//    2. meld.Meld A♥,K♥,K♥
+//    3. meld.Meld A♣,9♣,K♣,8♣,K♣,10♣
+//    4. meld.Meld A♣,9♣,K♣,8♣,K♣
 
     @Test
     fun shouldNotBeAbleToMeldAceKingKing() {

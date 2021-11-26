@@ -1,3 +1,6 @@
+package meld
+
+import PlayingCard
 import PlayingCard.Value.JOKER
 import PlayingCard.Value.TWO
 

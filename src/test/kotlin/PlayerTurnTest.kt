@@ -2,6 +2,7 @@ import PlayingCard.Suit.SPADE
 import PlayingCard.Value.*
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import player.HumanPlayer
 import kotlin.test.assertFalse
 
 internal class PlayerTurnTest {

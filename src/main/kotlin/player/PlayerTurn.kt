@@ -1,3 +1,9 @@
+package player
+
+import MeldMove
+import Move
+import PlayingCard
+
 interface PlayerTurn {
 
     fun performMove(move: Move)

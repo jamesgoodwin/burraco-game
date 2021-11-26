@@ -1,6 +1,7 @@
 import PlayingCard.Suit.DIAMOND
 import PlayingCard.Suit.HEART
 import PlayingCard.Value
+import meld.HandEvaluator
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
 import kotlin.test.assertTrue
