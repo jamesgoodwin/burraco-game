@@ -1,9 +1,7 @@
 package meld
 
-import Burraco
 import PlayingCard
 import PlayingCard.Value.*
-import com.sun.org.apache.xpath.internal.operations.Bool
 
 data class Meld(val cards: List<PlayingCard>) {
 

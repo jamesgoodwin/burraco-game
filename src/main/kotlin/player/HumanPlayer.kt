@@ -36,16 +36,12 @@ class HumanPlayer(private val name: String) : Player {
 
     private fun placeCardInput(state: State, turn: PlayerTurn) {
         val handState = state.hand(this)
-        val meldsState = state.melds(this)?.map { cards -> Meld(cards) }
+        val meldsState = state.melds(this).map { cards -> Meld(cards) }
 
-        val moves = when {
-            (handState != null && meldsState != null) -> meldMovesFinder.getAllMoves(handState, state, meldsState)
-            handState != null -> meldMovesFinder.getAllMoves(handState, state, emptyList())
-            else -> null
-        }
+        val moves = meldMovesFinder.getAllMoves(handState, state, emptyList())
 
         println("Please choose an option:")
-        if (moves?.isNotEmpty() == true) {
+        if (moves.isNotEmpty()) {
             println("1. to discard a card\n2. to meld cards")
         } else {
             println("1. to discard a card")
@@ -58,11 +54,11 @@ class HumanPlayer(private val name: String) : Player {
                 }
                 "2" -> {
                     println("Choose cards to meld")
-                    moves?.forEachIndexed { index, move ->
+                    moves.forEachIndexed { index, move ->
                         println("${index + 1}. $move")
                     }
                     readLine()?.let { meldIndex ->
-                        val move = moves?.get(meldIndex.toInt() - 1)
+                        val move = moves.get(meldIndex.toInt() - 1)
                         if (move != null && turn.meld(move)) {
                             state.printGameState(this)
                             placeCardInput(state, turn)

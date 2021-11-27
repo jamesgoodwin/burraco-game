@@ -1,15 +1,29 @@
-import Burraco.*
+import meld.Burraco
+import meld.Burraco.*
 import meld.Meld
 import player.Player
+import player.PlayerTurnState.MELDING
+import player.PlayerTurnState.PICKING
 
-class State(val players: List<Player>) {
+class State(val players: List<Player>, val meldMovesFinder: MovesFinder) {
 
-    fun hand(player: Player): List<PlayingCard>? {
-        return hands[player]
+    var finished: Boolean = false
+    var playersTurn: Player = players[0]
+    var playerTurnState = PICKING
+
+    val hands: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
+    val melds: Map<Player, MutableList<MutableList<PlayingCard>>> = players.associateWith { mutableListOf() }
+
+    var stock = ArrayDeque<PlayingCard>()
+    val discard = mutableListOf<PlayingCard>()
+    val pots: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
+
+    fun hand(player: Player): MutableList<PlayingCard> {
+        return hands[player] ?: mutableListOf()
     }
 
-    fun melds(player: Player): MutableList<MutableList<PlayingCard>>? {
-        return melds[player]
+    fun melds(player: Player): MutableList<MutableList<PlayingCard>> {
+        return melds[player] ?: mutableListOf(mutableListOf())
     }
 
     fun printTotalCardCount() {
@@ -32,15 +46,15 @@ class State(val players: List<Player>) {
 
     fun printMelds(player: Player) {
         val melds = melds(player)
-        if (melds?.isNotEmpty() == true) {
+        if (melds.isNotEmpty()) {
             val cards = melds.joinToString(" - ") { it.sorted().joinToString(", ") }
             println("Melds: $cards")
         }
     }
 
     private fun printHand(player: Player) {
-        val cards = hand(player)?.sorted()
-        val hand = cards?.joinToString(", ")
+        val cards = hand(player).sorted()
+        val hand = cards.joinToString(", ")
         println("Hand: $hand")
     }
 
@@ -97,18 +111,16 @@ class State(val players: List<Player>) {
         } else emptyList()
     }
 
-    var finished: Boolean = false
-    var playersTurn: Player = players[0]
-
-    val hands: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
-    val melds: Map<Player, MutableList<MutableList<PlayingCard>>> = players.associateWith { mutableListOf() }
-
-    var stock = ArrayDeque<PlayingCard>()
-    var discard = mutableListOf<PlayingCard>()
-    val pots: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
+    fun getAllPossibleMoves(): List<Move> {
+        return when(playerTurnState) {
+            PICKING -> listOf(TakePileMove(this), TakeCardMove(this))
+            MELDING -> {
+                val hand = hand(playersTurn)
+                val melds = melds(playersTurn).map { cards -> Meld(cards) }
+                meldMovesFinder.getAllMoves(hand, this, melds)
+            }
+        }
+    }
 
 }
 
-enum class Burraco(points: Int) {
-    PULITO(200), SPORCO(100), SEMI_PULITO(150), NO_BURRACO(0)
-}

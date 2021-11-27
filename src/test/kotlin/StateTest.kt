@@ -1,5 +1,6 @@
 import PlayingCard.Suit.SPADE
 import PlayingCard.Value.ACE
+import meld.MeldMovesFinder
 import org.junit.Ignore
 import org.junit.Test
 import player.HumanPlayer
@@ -10,7 +11,7 @@ internal class StateTest {
     @Test
     fun shouldHaveBurracoWhenPlayerHasSevenCardMeld() {
         val bill = HumanPlayer("bill")
-        val state = State(listOf(bill, HumanPlayer("bob")))
+        val state = State(listOf(bill, HumanPlayer("bob")), MeldMovesFinder())
         val meld = mutableListOf<PlayingCard>()
         repeat(7) {
             meld.add(PlayingCard(ACE, SPADE))
@@ -23,7 +24,7 @@ internal class StateTest {
     @Test
     fun shouldHaveBurraco() {
         val bill = HumanPlayer("bill")
-        val state = State(listOf(bill, HumanPlayer("bob")))
+        val state = State(listOf(bill, HumanPlayer("bob")), MeldMovesFinder())
         val meld = mutableListOf<PlayingCard>()
         repeat(7) {
             meld.add(PlayingCard(ACE, SPADE))

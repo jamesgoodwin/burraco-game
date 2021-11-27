@@ -1,5 +1,6 @@
 import PlayingCard.Value.JOKER
 import meld.HandEvaluator
+import meld.MeldMovesFinder
 import player.HumanPlayer
 import player.LowAiPlayer
 import java.lang.RuntimeException
@@ -8,11 +9,8 @@ import kotlin.collections.ArrayList
 
 class BurracoGame(
     var state: State = State(
-        listOf(
-            HumanPlayer("1"),
-            LowAiPlayer(meldEvaluator = HandEvaluator())
-        )
-    )
+        players = listOf(HumanPlayer("1"), LowAiPlayer(meldEvaluator = HandEvaluator())),
+        meldMovesFinder = MeldMovesFinder()),
 ) {
 
     init {
@@ -26,7 +24,7 @@ class BurracoGame(
             state.printGameState(state.playersTurn)
             state.playersTurn.takeTurn(state, StateBasedPlayerTurn(state))
 
-            if(state.playerClosed(state.playersTurn)) {
+            if (state.playerClosed(state.playersTurn)) {
                 state.finished = true
             }
             // todo - finish the game if less cards in the deck than full player rounds
@@ -72,7 +70,4 @@ class BurracoGame(
         }
     }
 
-    private fun clear() {
-        state = State(listOf(HumanPlayer("1"), HumanPlayer("2")))
-    }
 }

@@ -9,10 +9,10 @@ class ExistingMeldMove(
 ) : MeldMove {
 
     override fun performMove(): Boolean {
-        if (state.hand(state.playersTurn)?.containsAll(meldAttempt.handCardsUsed) != true) return false
+        if (!state.hand(state.playersTurn).containsAll(meldAttempt.handCardsUsed)) return false
 
-        val existingMeld = state.melds(state.playersTurn)?.get(meldAttempt.index)
-        existingMeld?.addAll(meldAttempt.handCardsUsed)
+        val existingMeld = state.melds(state.playersTurn)[meldAttempt.index]
+        existingMeld.addAll(meldAttempt.handCardsUsed)
         meldAttempt.handCardsUsed.forEach { card ->
             state.hands[state.playersTurn]?.remove(card)
         }

@@ -1,5 +1,6 @@
 import PlayingCard.Suit.SPADE
 import PlayingCard.Value.*
+import meld.MeldMovesFinder
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import player.HumanPlayer
@@ -7,23 +8,23 @@ import kotlin.test.assertFalse
 
 internal class PlayerTurnTest {
 
-    val player1 = HumanPlayer("player 1")
-    val player2 = HumanPlayer("player 2")
+    private val player1 = HumanPlayer("player 1")
+    private val player2 = HumanPlayer("player 2")
 
     @Test
     fun shouldBeAbleToTakeACardPlayerOne() {
-        val state = State(listOf(player1, player2))
+        val state = State(listOf(player1, player2), MeldMovesFinder())
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state)
         playerTurn.takeCard()
 
-        assertTrue(state.hand(player1)?.size == 1)
+        assertTrue(state.hand(player1).size == 1)
     }
 
     @Test
     fun shouldBeAbleToTakeACardAndDiscardACard() {
-        val state = State(listOf(player1, player2))
+        val state = State(listOf(player1, player2), MeldMovesFinder())
         val card = PlayingCard(ACE, SPADE)
 
         state.stock.add(card)
@@ -31,22 +32,23 @@ internal class PlayerTurnTest {
         val playerTurn = StateBasedPlayerTurn(state)
         val taken = playerTurn.takeCard()
 
-        val discarded = state.hand(player1)?.get(0)?.let {
+        val discarded = state.hand(player1)[0].let {
             playerTurn.discard(it)
         }
 
-        assertTrue(taken && discarded == true)
+        assertTrue(taken && discarded)
     }
 
     @Test
     fun shouldBeAbleToTakeACardPLayer2AfterPlayer1DiscardsACard() {
-        val state = State(listOf(player1, player2))
+        val state = State(listOf(player1, player2), MeldMovesFinder())
+
         state.stock.addAll(listOf(PlayingCard(ACE, SPADE), PlayingCard(ACE, SPADE)))
 
         val player1Turn = StateBasedPlayerTurn(state)
         player1Turn.takeCard()
 
-        state.hand(player1)?.get(0)?.let {
+        state.hand(player1)[0].let {
             player1Turn.discard(it)
         }
 
@@ -56,13 +58,13 @@ internal class PlayerTurnTest {
 
     @Test
     fun shouldNotBeAbleToTakeACardAfterDiscardingCard() {
-        val state = State(listOf(player1, player2))
+        val state = State(listOf(player1, player2), MeldMovesFinder())
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state)
         playerTurn.takeCard()
 
-        state.hand(player1)?.get(0)?.let {
+        state.hand(player1)[0].let {
             playerTurn.discard(it)
         }
 
@@ -71,7 +73,7 @@ internal class PlayerTurnTest {
 
     @Test
     fun shouldNotBeAbleToTakeACardMoreThanOnce() {
-        val state = State(listOf(player1, player2))
+        val state = State(listOf(player1, player2), MeldMovesFinder())
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state)
@@ -82,7 +84,7 @@ internal class PlayerTurnTest {
 
     @Test
     fun shouldNotBeAbleToDiscardBeforeTaking() {
-        val state = State(listOf(player1, player2))
+        val state = State(listOf(player1, player2), MeldMovesFinder())
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state)
@@ -91,7 +93,7 @@ internal class PlayerTurnTest {
 
     @Test
     fun shouldNotBeAbleToDiscardMoreThanOnce() {
-        val state = State(listOf(player1, player2))
+        val state = State(listOf(player1, player2), MeldMovesFinder())
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state)
@@ -103,7 +105,7 @@ internal class PlayerTurnTest {
 
     @Test
     fun shouldBeAbleToPutDownNewMeld() {
-        val state = State(listOf(player1, player2))
+        val state = State(listOf(player1, player2), MeldMovesFinder())
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val playerTurn = StateBasedPlayerTurn(state)
@@ -115,7 +117,7 @@ internal class PlayerTurnTest {
 
     @Test
     fun shouldRemoveCardsFromHandWhenMeldPlayed() {
-        val state = State(listOf(player1, player2))
+        val state = State(listOf(player1, player2), MeldMovesFinder())
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val cards = listOf(
@@ -130,12 +132,12 @@ internal class PlayerTurnTest {
         playerTurn.takeCard()
 
         playerTurn.meld(cards, 0)
-        assertTrue(state.hand(player1)?.size == 1)
+        assertTrue(state.hand(player1).size == 1)
     }
 
     @Test
     fun shouldBeAbleToAddCardToExistingMeld() {
-        val state = State(listOf(player1, player2))
+        val state = State(listOf(player1, player2), MeldMovesFinder())
         state.stock.add(PlayingCard(ACE, SPADE))
 
         val cards = listOf(
@@ -152,5 +154,4 @@ internal class PlayerTurnTest {
         playerTurn.meld(cards, 0)
         playerTurn.meld(listOf(PlayingCard(JACK, SPADE)), 0)
     }
-
 }

@@ -1,18 +1,19 @@
 package meld
 
 import MeldMove
+import MovesFinder
 import NewMeldMove
 import PlayingCard
 import State
 import kotlin.math.max
 import kotlin.math.min
 
-class MeldMovesFinder {
+class MeldMovesFinder : MovesFinder {
 
     // todo - split move finding into 4 categories - meld new sequence, meld existing sequence,
     //  meld new combination, meld existing combination
 
-    fun getAllMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): List<MeldMove> {
+    override fun getAllMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): List<MeldMove> {
         val handBySuit = hand.groupBy { it.suit }
         val handByValue = hand.groupBy { it.value }
         val wildcards = hand.filter { it.wildcard }
@@ -160,6 +161,7 @@ class MeldMovesFinder {
             .map {
                 ExistingMeldMove(it, state)
             }.toList()
+            .distinctBy { it.toString() }
     }
 
     private fun createWindows(

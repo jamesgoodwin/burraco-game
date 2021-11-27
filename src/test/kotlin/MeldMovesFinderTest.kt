@@ -9,7 +9,7 @@ import kotlin.test.assertTrue
 
 internal class MeldMovesFinderTest {
 
-    private val state = State(listOf(HumanPlayer("bob"), HumanPlayer("sue")))
+    private val state = State(listOf(HumanPlayer("bob"), HumanPlayer("sue")), MeldMovesFinder())
     private val meldMovesFinder = MeldMovesFinder()
 
     @Test

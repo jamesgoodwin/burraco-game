@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 
 internal class SequenceMeldMovesTest {
 
-    private val state = State(listOf(HumanPlayer("bob"), HumanPlayer("sue")))
+    private val state = State(listOf(HumanPlayer("bob"), HumanPlayer("sue")), MeldMovesFinder())
     private val meldMovesFinder = MeldMovesFinder()
 
 //    Hand: Joker, Joker, 5♥, 7♥, J♥, 3♦, 4♦, 8♦, 4♠, Q♠
@@ -306,7 +306,7 @@ internal class SequenceMeldMovesTest {
             )
         )
         val moves = meldMovesFinder.getMeldToExistingSequenceMoves(hand, emptyList(), melds, state)
-        assertEquals(1, moves.size)
+        assertEquals(2, moves.size)
     }
 
 //    Hand: 5♥, 5♥, 6♥, 9♥, Q♥

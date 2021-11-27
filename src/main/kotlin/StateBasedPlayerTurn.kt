@@ -76,7 +76,7 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
         return false
     }
 
-    private fun playerCanTakePot() = (state.hand(state.playersTurn)?.isEmpty() == true && !playerHasTakenPot())
+    private fun playerCanTakePot() = (state.hand(state.playersTurn).isEmpty() && !playerHasTakenPot())
 
     private fun playerHasTakenPot() = state.pots[state.playersTurn]?.isEmpty() == true
     
