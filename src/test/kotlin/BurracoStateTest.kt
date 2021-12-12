@@ -6,7 +6,7 @@ import org.junit.Test
 import player.HumanPlayer
 import kotlin.test.assertTrue
 
-internal class StateTest {
+internal class BurracoStateTest {
 
     @Test
     fun shouldHaveBurracoWhenPlayerHasSevenCardMeld() {

@@ -55,7 +55,7 @@ class MeldMovesFinder : MovesFinder {
             }
             .filter { Meld(it.handCardsUsed).valid }
             .map {
-                NewMeldMove(Meld(it.handCardsUsed), state)
+                NewMeldMove(Meld(it.handCardsUsed))
             }.toList()
     }
 
@@ -91,7 +91,7 @@ class MeldMovesFinder : MovesFinder {
             }
             .filter { Meld(it.handCardsUsed + it.existingMeld).valid }
             .map {
-                ExistingMeldMove(it, state)
+                ExistingMeldMove(it)
             }.toList()
             .distinctBy { }
     }
@@ -123,7 +123,7 @@ class MeldMovesFinder : MovesFinder {
         .flatten()
         .filter { Meld(it.handCardsUsed).valid }
         .map {
-            NewMeldMove(Meld(it.handCardsUsed), state)
+            NewMeldMove(Meld(it.handCardsUsed))
         }.toList()
 
     fun getMeldToExistingSequenceMoves(
@@ -159,7 +159,7 @@ class MeldMovesFinder : MovesFinder {
             .flatten()
             .filter { Meld(it.meldCombo).valid }
             .map {
-                ExistingMeldMove(it, state)
+                ExistingMeldMove(it)
             }.toList()
             .distinctBy { it.toString() }
     }

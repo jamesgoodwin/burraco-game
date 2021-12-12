@@ -3,12 +3,9 @@ package meld
 import MeldMove
 import State
 
-class ExistingMeldMove(
-    private val meldAttempt: MeldAttempt,
-    val state: State
-) : MeldMove {
+class ExistingMeldMove(private val meldAttempt: MeldAttempt) : MeldMove {
 
-    override fun performMove(): Boolean {
+    override fun performMove(state: State): Boolean {
         if (!state.hand(state.playersTurn).containsAll(meldAttempt.handCardsUsed)) return false
 
         val existingMeld = state.melds(state.playersTurn)[meldAttempt.index]

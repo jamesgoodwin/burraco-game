@@ -2,14 +2,14 @@ import PlayingCard.Value.JOKER
 import meld.HandEvaluator
 import meld.MeldMovesFinder
 import player.HumanPlayer
+import player.IsmctsPlayer
 import player.LowAiPlayer
-import java.lang.RuntimeException
 import kotlin.collections.ArrayDeque
 import kotlin.collections.ArrayList
 
 class BurracoGame(
     var state: State = State(
-        players = listOf(HumanPlayer("1"), LowAiPlayer(meldEvaluator = HandEvaluator())),
+        players = listOf(HumanPlayer("1"), IsmctsPlayer()),
         meldMovesFinder = MeldMovesFinder()),
 ) {
 
@@ -22,13 +22,7 @@ class BurracoGame(
             val name = state.playersTurn.name()
             println("--- player.Player ($name) turn ---")
             state.printGameState(state.playersTurn)
-            state.playersTurn.takeTurn(state, StateBasedPlayerTurn(state))
-
-            if (state.playerClosed(state.playersTurn)) {
-                state.finished = true
-            }
-            // todo - finish the game if less cards in the deck than full player rounds
-            nextPlayer()
+            state.takeNextTurn()
         }
     }
 
@@ -60,14 +54,6 @@ class BurracoGame(
         }
 
         state.stock = ArrayDeque(cards)
-    }
-
-    private fun nextPlayer() {
-        state.playersTurn = when (state.playersTurn) {
-            state.players[0] -> state.players[1]
-            state.players[1] -> state.players[0]
-            else -> throw RuntimeException("Unknown player")
-        }
     }
 
 }

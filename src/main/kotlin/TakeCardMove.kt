@@ -1,6 +1,6 @@
-class TakeCardMove(val state: State) : Move {
+class TakeCardMove : Move {
 
-    override fun performMove(): Boolean {
+    override fun performMove(state: State): Boolean {
         state.hands[state.playersTurn]?.add(state.stock.removeLast())
         state.printTotalCardCount()
         return true

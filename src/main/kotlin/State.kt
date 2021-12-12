@@ -2,20 +2,27 @@ import meld.Burraco
 import meld.Burraco.*
 import meld.Meld
 import player.Player
+import player.PlayerTurn
 import player.PlayerTurnState.MELDING
 import player.PlayerTurnState.PICKING
+import java.lang.RuntimeException
 
-class State(val players: List<Player>, val meldMovesFinder: MovesFinder) {
+data class State(
+    val players: List<Player>,
+    val meldMovesFinder: MovesFinder,
+    var playersTurn: Player = players[0],
+    var stock: ArrayDeque<PlayingCard> = ArrayDeque(),
+    val discard: MutableList<PlayingCard> = mutableListOf()
+) : Cloneable {
+
+    constructor(state: State) : this(state.players, state.meldMovesFinder, state.playersTurn, state.stock, state.discard.toMutableList()) {}
 
     var finished: Boolean = false
-    var playersTurn: Player = players[0]
-    var playerTurnState = PICKING
+    var playerTurnState: PlayerTurn = StateBasedPlayerTurn(this)
 
     val hands: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
     val melds: Map<Player, MutableList<MutableList<PlayingCard>>> = players.associateWith { mutableListOf() }
 
-    var stock = ArrayDeque<PlayingCard>()
-    val discard = mutableListOf<PlayingCard>()
     val pots: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
 
     fun hand(player: Player): MutableList<PlayingCard> {
@@ -26,10 +33,34 @@ class State(val players: List<Player>, val meldMovesFinder: MovesFinder) {
         return melds[player] ?: mutableListOf(mutableListOf())
     }
 
-    fun printTotalCardCount() {
-        val cardsInHands = players.mapNotNull { hand(it) }.map { it.size }.sumOf { it }
+    public override fun clone(): State {
+        val clone = State(state = this)
 
-        val cardsInMelds = players.mapNotNull { melds(it) }.flatten().map { it.size }.sumOf { it }
+        clone.playersTurn = this.playersTurn
+        clone.stock = ArrayDeque()
+        clone.stock.addAll(this.stock)
+
+        clone.pots.forEach {
+            val cards = this.pots[it.key]
+            if (cards != null) {
+                it.value.addAll(cards)
+            }
+        }
+
+        clone.melds.forEach {
+            val melds = this.melds[it.key]
+            if (melds != null) {
+                it.value.addAll(melds.toList())
+            }
+        }
+
+        return clone
+    }
+
+    fun printTotalCardCount() {
+        val cardsInHands = players.map { hand(it) }.map { it.size }.sumOf { it }
+
+        val cardsInMelds = players.map { melds(it) }.flatten().map { it.size }.sumOf { it }
 
         val cardsInPot = players.mapNotNull { pots[it] }.map { it.size }.sumOf { it }
 
@@ -87,7 +118,7 @@ class State(val players: List<Player>, val meldMovesFinder: MovesFinder) {
         val takenPotPenalty = if (takenPot == true) 0 else 100
 
         val playerHasWon = finished && playerClosed(player)
-        val winningPoints = if(playerHasWon) 100 else 0
+        val winningPoints = if (playerHasWon) 100 else 0
 
         return ((burracoPoints + meldCardPoints + winningPoints) - handCardPoints) - takenPotPenalty
     }
@@ -112,14 +143,41 @@ class State(val players: List<Player>, val meldMovesFinder: MovesFinder) {
     }
 
     fun getAllPossibleMoves(): List<Move> {
-        return when(playerTurnState) {
-            PICKING -> listOf(TakePileMove(this), TakeCardMove(this))
+        return when (playerTurnState.getTurnState()) {
+            PICKING -> listOf(TakePileMove(), TakeCardMove())
             MELDING -> {
                 val hand = hand(playersTurn)
                 val melds = melds(playersTurn).map { cards -> Meld(cards) }
                 meldMovesFinder.getAllMoves(hand, this, melds)
             }
         }
+    }
+
+    private fun advancePlayer() {
+        playersTurn = when (playersTurn) {
+            players[0] -> players[1]
+            players[1] -> players[0]
+            else -> throw RuntimeException("Unknown player")
+        }
+    }
+
+    fun doMove(moveToPlay: Move?, ai: Boolean) {
+        if (moveToPlay != null) {
+            playerTurnState.performMove(moveToPlay)
+        }
+    }
+
+    fun takeNextTurn() {
+        playersTurn.takeTurn(this, playerTurnState)
+        if (playerClosed(playersTurn)) {
+            finished = true
+        }
+        advancePlayer()
+        // todo - finish the game if less cards in the deck than full player rounds
+    }
+
+    fun copyAndRandomizeState(): State {
+        return this.clone()
     }
 
 }

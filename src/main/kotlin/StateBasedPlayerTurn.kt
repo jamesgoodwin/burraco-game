@@ -1,5 +1,6 @@
 import meld.Meld
 import player.PlayerTurn
+import player.PlayerTurnState
 
 class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
 
@@ -7,12 +8,12 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
     var discardedCard: Boolean = false
 
     override fun performMove(move: Move) {
-        move.performMove()
+        move.performMove(state)
     }
 
     override fun takeCard(): Boolean {
         if (!takenCard) {
-            performMove(TakeCardMove(state))
+            performMove(TakeCardMove())
             takenCard = true
             return true
         }
@@ -21,7 +22,7 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
 
     override fun takePile(): Boolean {
         if (!takenCard) {
-            performMove(TakePileMove(state))
+            performMove(TakePileMove())
             takenCard = true
             return true
         }
@@ -30,11 +31,11 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
 
     override fun discard(card: PlayingCard): Boolean {
         if (takenCard && !discardedCard) {
-            performMove(DiscardMove(card, state))
+            performMove(DiscardMove(card))
             discardedCard = true
 
             if (playerCanTakePot()) {
-                performMove(TakePotMove(state))
+                performMove(TakePotMove())
             }
             return true
         }
@@ -43,10 +44,10 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
     
     override fun meld(cards: List<PlayingCard>, i: Int): Boolean {
         if (takenCard) {
-            performMove(NewMeldMove(Meld(cards), state))
+            performMove(NewMeldMove(Meld(cards)))
 
             if (playerCanTakePot()) {
-                performMove(TakePotMove(state))
+                performMove(TakePotMove())
             }
             return true
         }
@@ -55,10 +56,10 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
 
     override fun meld(cards: List<PlayingCard>): Boolean {
         if (takenCard) {
-            performMove(NewMeldMove(Meld(cards), state))
+            performMove(NewMeldMove(Meld(cards)))
 
             if (playerCanTakePot()) {
-                performMove(TakePotMove(state))
+                performMove(TakePotMove())
             }
             return true
         }
@@ -69,11 +70,16 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
         if (takenCard) {
             performMove(move)
             if (playerCanTakePot()) {
-                performMove(TakePotMove(state))
+                performMove(TakePotMove())
             }
             return true
         }
         return false
+    }
+
+    override fun getTurnState(): PlayerTurnState {
+        return if(!takenCard) PlayerTurnState.PICKING
+        else PlayerTurnState.MELDING
     }
 
     private fun playerCanTakePot() = (state.hand(state.playersTurn).isEmpty() && !playerHasTakenPot())

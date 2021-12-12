@@ -1,4 +1,4 @@
 interface Move {
-    fun performMove(): Boolean
+    fun performMove(state: State): Boolean
 }
 

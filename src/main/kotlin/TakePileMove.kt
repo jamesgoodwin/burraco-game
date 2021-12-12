@@ -1,6 +1,6 @@
-class TakePileMove(val state: State) : Move {
+class TakePileMove : Move {
 
-    override fun performMove(): Boolean {
+    override fun performMove(state: State): Boolean {
         state.hands[state.playersTurn]?.addAll(state.discard)
         state.discard.clear()
 

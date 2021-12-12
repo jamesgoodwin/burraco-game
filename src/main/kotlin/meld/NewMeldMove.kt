@@ -2,10 +2,10 @@ import meld.Meld
 
 interface MeldMove : Move
 
-class NewMeldMove(val meld: Meld, val state: State) : MeldMove {
+class NewMeldMove(val meld: Meld) : MeldMove {
 
-    override fun performMove(): Boolean {
-        if (state.hand(state.playersTurn)?.containsAll(meld.cards) != true) return false
+    override fun performMove(state: State): Boolean {
+        if (!state.hand(state.playersTurn).containsAll(meld.cards)) return false
 
         if (meld.valid) {
             state.melds[state.playersTurn]?.add(meld.cards.toMutableList())

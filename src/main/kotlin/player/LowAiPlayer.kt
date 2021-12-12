@@ -12,7 +12,7 @@ class LowAiPlayer(val meldEvaluator: MeldEvaluator) : Player {
             turn.takeCard()
         }
 
-        state.hand(this)?.let { cards ->
+        state.hand(this).let { cards ->
             val melds = meldEvaluator.getMelds(cards)
             if (melds.isNotEmpty()) {
                 turn.meld(melds.first())
@@ -20,7 +20,7 @@ class LowAiPlayer(val meldEvaluator: MeldEvaluator) : Player {
             state.printMelds(this)
         }
 
-        state.hand(this)?.first()?.let { card ->
+        state.hand(this).first().let { card ->
             turn.discard(card)
         }
 
