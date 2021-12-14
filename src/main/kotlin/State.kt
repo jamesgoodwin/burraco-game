@@ -54,6 +54,13 @@ data class State(
             }
         }
 
+        clone.hands.forEach {
+            val hand = this.hands[it.key]
+            if (hand != null) {
+                it.value.addAll(hand.toList())
+            }
+        }
+
         return clone
     }
 
