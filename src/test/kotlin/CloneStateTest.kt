@@ -62,4 +62,15 @@ internal class CloneStateTest {
         assertNotSame(state.melds, clone.melds)
     }
 
+    @Test
+    fun shouldCloneHands() {
+        val state = State(players, meldMovesFinder)
+        state.hands[state.players[0]]?.addAll(mutableListOf(PlayingCard(TWO, HEART)))
+        state.hands[state.players[1]]?.addAll(mutableListOf(PlayingCard(TWO, SPADE)))
+
+        val clone = state.clone()
+        assertEquals(state.hands, clone.hands)
+        assertNotSame(state.hands, clone.hands)
+    }
+
 }
