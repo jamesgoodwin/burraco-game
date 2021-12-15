@@ -1,13 +1,14 @@
 import PlayingCard.Suit.HEART
 import PlayingCard.Suit.SPADE
-import PlayingCard.Value.JOKER
-import PlayingCard.Value.TWO
+import PlayingCard.Value.*
 import meld.MeldMovesFinder
 import org.junit.Test
 import player.HumanPlayer
 import player.Player
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotSame
+import kotlin.test.assertTrue
 
 internal class CloneStateTest {
 
@@ -71,6 +72,34 @@ internal class CloneStateTest {
         val clone = state.clone()
         assertEquals(state.hands, clone.hands)
         assertNotSame(state.hands, clone.hands)
+    }
+
+    @Test
+    fun shouldCloneSeenCards() {
+        val state = State(players, meldMovesFinder)
+        state.seenCards[players.first()]?.addAll(listOf(PlayingCard(ACE, SPADE)))
+
+        val clone = state.clone()
+        assertEquals(state.seenCards, clone.seenCards)
+        assertNotSame(state.seenCards, clone.seenCards)
+    }
+
+    @Test
+    fun shouldCloneAndRandomiseStateOfHiddenCards() {
+        val state = State(players, meldMovesFinder)
+        BurracoGame(state)
+
+        val firstPlayer = players.first()
+        val threeCards = state.hands[firstPlayer]?.take(3) ?: emptyList()
+        state.seenCards[firstPlayer]?.addAll(threeCards)
+
+        val clone = state.cloneAndRandomiseState()
+
+        assertTrue(clone.hand(firstPlayer).containsAll(threeCards))
+
+        assertNotEquals(state, clone)
+        assertNotEquals(state.hands, clone.hands)
+        assertNotEquals(state.stock, clone.stock)
     }
 
 }

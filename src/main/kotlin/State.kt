@@ -12,18 +12,26 @@ data class State(
     val meldMovesFinder: MovesFinder,
     var playersTurn: Player = players[0],
     var stock: ArrayDeque<PlayingCard> = ArrayDeque(),
-    val discard: MutableList<PlayingCard> = mutableListOf()
+    val discard: MutableList<PlayingCard> = mutableListOf(),
 ) : Cloneable {
 
-    constructor(state: State) : this(state.players, state.meldMovesFinder, state.playersTurn, state.stock, state.discard.toMutableList()) {}
+    constructor(state: State) : this(state.players,
+        state.meldMovesFinder,
+        state.playersTurn,
+        state.stock,
+        state.discard.toMutableList()) {
+    }
 
     var finished: Boolean = false
     var playerTurnState: PlayerTurn = StateBasedPlayerTurn(this)
 
-    val hands: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
     val melds: Map<Player, MutableList<MutableList<PlayingCard>>> = players.associateWith { mutableListOf() }
 
+    val hands: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
     val pots: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
+
+    // a players cards which can be considered seen by the other players
+    val seenCards: Map<Player, MutableList<PlayingCard>> = players.associateWith { mutableListOf() }
 
     fun hand(player: Player): MutableList<PlayingCard> {
         return hands[player] ?: mutableListOf()
@@ -58,6 +66,13 @@ data class State(
             val hand = this.hands[it.key]
             if (hand != null) {
                 it.value.addAll(hand.toList())
+            }
+        }
+
+        clone.seenCards.forEach {
+            val cards = this.seenCards[it.key]
+            if (cards != null) {
+                it.value.addAll(cards)
             }
         }
 
@@ -183,9 +198,100 @@ data class State(
         // todo - finish the game if less cards in the deck than full player rounds
     }
 
-    fun copyAndRandomizeState(): State {
-        return this.clone()
+    fun cloneAndRandomiseState(): State {
+        val clone = this.clone()
+
+        // get a copy of all the seen cards
+        val visibleCards = clone.seenCards.toMutableMap()
+        visibleCards[playersTurn]?.clear()
+        visibleCards[playersTurn]?.addAll(hand(playersTurn))
+
+        // get the deck, pots and any unseen cards from each player, add them together and shuffle
+        val hiddenCards = ArrayDeque(getHiddenCards(clone, visibleCards).shuffled())
+
+        // loop through each player
+        clone.players.forEach { player ->
+            val hand = clone.hands[player]
+            val handSize = hand?.size ?: 0
+            hand?.clear()
+            hand?.addAll(visibleCards[player] ?: emptyList())
+            val remaining = handSize - (hand?.size ?: 0)
+            hand?.addAll(hiddenCards.take(remaining))
+        }
+
+        clone.pots.mapValues { (_, cards) ->
+            val count = cards.size
+            cards.clear()
+            cards.addAll(hiddenCards.take(count))
+        }
+
+        clone.stock.clear()
+        clone.stock = hiddenCards
+
+        return clone
+    }
+
+    private fun getHiddenCards(
+        clone: State,
+        allVisibleCards: MutableMap<Player, MutableList<PlayingCard>>,
+    ): List<PlayingCard> {
+        val allCards = clone.stock.toMutableList()
+        allCards += clone.pots.flatMap { it.value }.toList()
+
+        hands.forEach { (player, cards) ->
+            val list = cards.toMutableList()
+            allVisibleCards[player]?.forEach {
+                list.remove(it)
+            }
+            allCards.addAll(list)
+        }
+
+        return allCards
+    }
+
+    fun takePile(player: Player) {
+        hands[player]?.addAll(discard)
+        seenCards[player]?.addAll(discard)
+        discard.clear()
+    }
+
+    fun takePot(player: Player) {
+        pots[player]?.toMutableList()?.let { hands[player]?.addAll(it) }
+        pots[player]?.clear()
+    }
+
+    fun takeCard(player: Player) {
+        hands[player]?.add(stock.removeLast())
+    }
+
+    fun discardCard(player: Player, card: PlayingCard) {
+        seenCards[player]?.remove(card)
+        discard.add(card)
+        hands[player]?.remove(card)
+    }
+
+    fun meld(cards: List<PlayingCard>, index: Int): Boolean {
+        if (!hand(playersTurn).containsAll(cards)) return false
+
+        val existingMeld = melds(playersTurn)[index]
+        existingMeld.addAll(cards)
+        cards.forEach { card ->
+            hands[playersTurn]?.remove(card)
+        }
+        return true
+    }
+
+    fun meld(player: Player, cards: List<PlayingCard>, valid: Boolean): Boolean {
+        if (!hand(player).containsAll(cards)) return false
+        if (valid) {
+            melds[player]?.add(cards.toMutableList())
+            cards.forEach { card ->
+                hands[player]?.remove(card)
+                seenCards[player]?.remove(card)
+            }
+            return true
+        }
+        return false
     }
 
 }
-

@@ -25,7 +25,7 @@ internal class CombinationsMeldMovesTest {
                         PlayingCard(SEVEN, SPADE)
                     )
         )
-        val moves = meldMovesFinder.getNewCombinationMeldMoves(hand, emptyList(), state)
+        val moves = meldMovesFinder.getNewCombinationMeldMoves(hand, emptyList())
         assertTrue(moves.isNotEmpty())
     }
 
@@ -41,7 +41,7 @@ internal class CombinationsMeldMovesTest {
                     ),
             TWO to listOf(twoOfDiamonds)
         )
-        val moves = meldMovesFinder.getNewCombinationMeldMoves(hand, listOf(twoOfDiamonds), state)
+        val moves = meldMovesFinder.getNewCombinationMeldMoves(hand, listOf(twoOfDiamonds))
         assertTrue(moves.isNotEmpty())
     }
 

@@ -1,25 +1,22 @@
-import meld.Meld
+package meld
+
+import Move
+import State
 
 interface MeldMove : Move
 
 class NewMeldMove(val meld: Meld) : MeldMove {
 
     override fun performMove(state: State): Boolean {
-        if (!state.hand(state.playersTurn).containsAll(meld.cards)) return false
+        val melded = state.meld(state.playersTurn, meld.cards, meld.valid)
 
-        if (meld.valid) {
-            state.melds[state.playersTurn]?.add(meld.cards.toMutableList())
-            meld.cards.forEach { card ->
-                state.hands[state.playersTurn]?.remove(card)
-            }
-            state.printTotalCardCount()
-            return true
-        }
-        return false
+        if(melded) state.printTotalCardCount()
+
+        return melded
     }
 
     override fun toString(): String {
-        return "meld.Meld $meld"
+        return "Meld $meld"
     }
 
 }

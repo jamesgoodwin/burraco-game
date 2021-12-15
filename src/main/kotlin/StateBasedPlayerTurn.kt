@@ -1,4 +1,6 @@
 import meld.Meld
+import meld.MeldMove
+import meld.NewMeldMove
 import player.PlayerTurn
 import player.PlayerTurnState
 

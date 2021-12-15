@@ -1,4 +1,5 @@
 import meld.Meld
+import meld.MeldMove
 
 interface MovesFinder {
 

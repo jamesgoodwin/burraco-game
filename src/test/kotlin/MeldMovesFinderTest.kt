@@ -13,7 +13,6 @@ internal class MeldMovesFinderTest {
     private val meldMovesFinder = MeldMovesFinder()
 
     @Test
-    @Ignore("will work on this after individual tests are working for 4 meld types")
     fun shouldMeldMultipleNewSequencesAndCombinations() {
         val hand = listOf(
             PlayingCard(QUEEN, HEART),

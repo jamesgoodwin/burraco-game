@@ -1,6 +1,6 @@
 package player
 
-import MeldMove
+import meld.MeldMove
 import Move
 import PlayingCard
 

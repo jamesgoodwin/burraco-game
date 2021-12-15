@@ -1,15 +1,11 @@
-import PlayingCard.Value.JOKER
 import meld.HandEvaluator
 import meld.MeldMovesFinder
 import player.HumanPlayer
-import player.IsmctsPlayer
 import player.LowAiPlayer
-import kotlin.collections.ArrayDeque
-import kotlin.collections.ArrayList
 
 class BurracoGame(
     var state: State = State(
-        players = listOf(HumanPlayer("1"), IsmctsPlayer()),
+        players = listOf(HumanPlayer("1"), LowAiPlayer(HandEvaluator())),
         meldMovesFinder = MeldMovesFinder()),
 ) {
 
@@ -27,21 +23,7 @@ class BurracoGame(
     }
 
     private fun dealCards() {
-        var cards = ArrayList<PlayingCard>()
-
-        for (suit in PlayingCard.Suit.values()) {
-            for (value in PlayingCard.Value.values().filterNot { it == JOKER }) {
-                repeat(2) {
-                    cards.add(PlayingCard(value, suit))
-                }
-            }
-        }
-
-        repeat(4) {
-            cards.add(PlayingCard(JOKER))
-        }
-
-        cards.shuffle()
+        var cards = Deck().shuffle()
 
         for (player in state.players) {
             val pot = ArrayList<PlayingCard>(cards.take(11))

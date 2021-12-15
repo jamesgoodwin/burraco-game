@@ -118,7 +118,7 @@ internal class SequenceMeldMovesTest {
                 PlayingCard(EIGHT, HEART)
             )
         )
-        val moves = meldMovesFinder.getNewSequenceMeldMoves(hand, emptyList(), state)
+        val moves = meldMovesFinder.getNewSequenceMeldMoves(hand, emptyList())
         assertEquals(moves.size, 1)
     }
 
@@ -254,7 +254,7 @@ internal class SequenceMeldMovesTest {
                 )
             )
         )
-        val moves = meldMovesFinder.getMeldToExistingSequenceMoves(hand, listOf(twoOfDiamonds), melds, state)
+        val moves = meldMovesFinder.getMeldToExistingSequenceMoves(hand, listOf(twoOfDiamonds), melds)
         assertNotNull(moves)
     }
 
@@ -276,7 +276,7 @@ internal class SequenceMeldMovesTest {
                 )
             )
         )
-        val moves = meldMovesFinder.getMeldToExistingSequenceMoves(hand, listOf(twoOfHearts), melds, state)
+        val moves = meldMovesFinder.getMeldToExistingSequenceMoves(hand, listOf(twoOfHearts), melds)
         assertEquals(0, moves.size)
     }
 
@@ -305,7 +305,7 @@ internal class SequenceMeldMovesTest {
                 )
             )
         )
-        val moves = meldMovesFinder.getMeldToExistingSequenceMoves(hand, emptyList(), melds, state)
+        val moves = meldMovesFinder.getMeldToExistingSequenceMoves(hand, emptyList(), melds)
         assertEquals(2, moves.size)
     }
 

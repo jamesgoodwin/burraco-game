@@ -1,8 +1,6 @@
 package meld
 
-import MeldMove
 import MovesFinder
-import NewMeldMove
 import PlayingCard
 import State
 import kotlin.math.max
@@ -20,10 +18,10 @@ class MeldMovesFinder : MovesFinder {
         val allMoves = mutableListOf<MeldMove>()
 
         allMoves.let {
-            it.addAll(getNewSequenceMeldMoves(handBySuit, wildcards, state))
-            it.addAll(getMeldToExistingSequenceMoves(handBySuit, wildcards, melds, state))
-            it.addAll(getNewCombinationMeldMoves(handByValue, wildcards, state))
-            it.addAll(getMeldToExistingCombinationMoves(handByValue, wildcards, melds, state))
+            it.addAll(getNewSequenceMeldMoves(handBySuit, wildcards))
+            it.addAll(getMeldToExistingSequenceMoves(handBySuit, wildcards, melds))
+            it.addAll(getNewCombinationMeldMoves(handByValue, wildcards))
+            it.addAll(getMeldToExistingCombinationMoves(handByValue, wildcards, melds))
         }
 
         return allMoves
@@ -32,7 +30,6 @@ class MeldMovesFinder : MovesFinder {
     fun getNewCombinationMeldMoves(
         handByValue: Map<PlayingCard.Value, List<PlayingCard>>,
         wildcards: List<PlayingCard>,
-        state: State
     ): List<MeldMove> {
         return handByValue.map { handCards ->
             var allCombinations: MutableList<List<PlayingCard>>? = mutableListOf()
@@ -63,7 +60,6 @@ class MeldMovesFinder : MovesFinder {
         handByValue: Map<PlayingCard.Value, List<PlayingCard>>,
         wildcards: List<PlayingCard>,
         melds: List<Meld>,
-        state: State
     ): List<MeldMove> {
         val meldsByValue = melds.groupBy { it.value }
 
@@ -99,20 +95,12 @@ class MeldMovesFinder : MovesFinder {
     fun getNewSequenceMeldMoves(
         handBySuit: Map<PlayingCard.Suit?, List<PlayingCard>>,
         wildcards: List<PlayingCard>,
-        state: State
     ) = handBySuit.map { handCards ->
         var allCombinations: MutableList<List<PlayingCard>>? = mutableListOf()
         // check for new melds
         if (handCards.value.size >= 2) {
             allCombinations?.add(handCards.value)
         }
-//        if (handCards.value.size >= 2 && wildcards.isNotEmpty()) {
-//            wildcards.forEach { wildcard ->
-//                val cardsUsed = handCards.value.toMutableList()
-//                cardsUsed.add(wildcard)
-//                allCombinations?.add(cardsUsed)
-//            }
-//        }
         if (allCombinations?.isEmpty() == true) allCombinations = null
         allCombinations
     }.filterNotNull()
@@ -130,7 +118,6 @@ class MeldMovesFinder : MovesFinder {
         handBySuit: Map<PlayingCard.Suit?, List<PlayingCard>>,
         wildcards: List<PlayingCard>,
         melds: List<Meld>,
-        state: State
     ): List<ExistingMeldMove> {
         val meldsBySuit = melds.groupBy { it.suit }
 
@@ -166,7 +153,7 @@ class MeldMovesFinder : MovesFinder {
 
     private fun createWindows(
         values: Triple<Int, List<PlayingCard>, List<PlayingCard>>,
-        wildcards: List<PlayingCard>
+        wildcards: List<PlayingCard>,
     ): List<MeldAttempt> {
         val windows = mutableListOf(listOf(listOf<PlayingCard>()))
 
@@ -191,7 +178,7 @@ class MeldMovesFinder : MovesFinder {
 
     private fun getWindowsWithNewMeld(
         hand: List<PlayingCard>,
-        wildcards: List<PlayingCard>
+        wildcards: List<PlayingCard>,
     ): Collection<List<List<PlayingCard>>> {
         val windows = mutableListOf(listOf(listOf<PlayingCard>()))
         // loop from current size down to meld size + 1
@@ -216,7 +203,7 @@ class MeldMovesFinder : MovesFinder {
     }
 
     private fun getWindowsWithExistingMeld(
-        values: Triple<Int, List<PlayingCard>, List<PlayingCard>>
+        values: Triple<Int, List<PlayingCard>, List<PlayingCard>>,
     ): Collection<List<List<PlayingCard>>> {
         val handWildcards = values.second.filter { it.wildcard }
         val allCards = (values.third.union(values.second) + handWildcards).sorted()

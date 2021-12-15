@@ -24,7 +24,7 @@ class ISMCTS(
             currentNode = rootNode
 
             // 1. Clone and determinize the state of the game (randomize information unknown to the AI)
-            currentState = rootState.copyAndRandomizeState()
+            currentState = rootState.cloneAndRandomiseState()
 
             possibleMoves = currentState.getAllPossibleMoves()
 
