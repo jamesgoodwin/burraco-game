@@ -3,16 +3,24 @@ import meld.MeldMove
 import meld.NewMeldMove
 import player.PlayerTurn
 import player.PlayerTurnState
+import player.PlayerTurnState.*
 
 class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
 
     var takenCard: Boolean = false
     var discardedCard: Boolean = false
 
+    // todo - check all mutations to state and verify with unit tests for all cases
     override fun performMove(move: Move) {
-        move.performMove(state)
+        val result = move.performMove(state)
+        when(move) {
+            is TakeCardMove, is TakePileMove -> if(result) takenCard = true
+            is DiscardMove -> if(result) discardedCard = true
+        }
+
     }
 
+    @Deprecated("Use Move objects instead")
     override fun takeCard(): Boolean {
         if (!takenCard) {
             performMove(TakeCardMove())
@@ -22,6 +30,7 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
         return false
     }
 
+    @Deprecated("Use Move objects instead")
     override fun takePile(): Boolean {
         if (!takenCard) {
             performMove(TakePileMove())
@@ -31,6 +40,7 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
         return false
     }
 
+    @Deprecated("Use Move objects instead")
     override fun discard(card: PlayingCard): Boolean {
         if (takenCard && !discardedCard) {
             performMove(DiscardMove(card))
@@ -43,7 +53,8 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
         }
         return false
     }
-    
+
+    @Deprecated("Use Move objects instead")
     override fun meld(cards: List<PlayingCard>, i: Int): Boolean {
         if (takenCard) {
             performMove(NewMeldMove(Meld(cards)))
@@ -56,6 +67,7 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
         return false
     }
 
+    @Deprecated("Use Move objects instead")
     override fun meld(cards: List<PlayingCard>): Boolean {
         if (takenCard) {
             performMove(NewMeldMove(Meld(cards)))
@@ -68,6 +80,7 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
         return false
     }
 
+    @Deprecated("Use Move objects instead")
     override fun meld(move: MeldMove): Boolean {
         if (takenCard) {
             performMove(move)
@@ -80,12 +93,15 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
     }
 
     override fun getTurnState(): PlayerTurnState {
-        return if(!takenCard) PlayerTurnState.PICKING
-        else PlayerTurnState.MELDING
+        return if(!takenCard) PICKING
+        else if(takenCard && !discardedCard) MELDING
+        else FINISHED
     }
 
     private fun playerCanTakePot() = (state.hand(state.playersTurn).isEmpty() && !playerHasTakenPot())
 
     private fun playerHasTakenPot() = state.pots[state.playersTurn]?.isEmpty() == true
+
+    override fun roundOver() = takenCard && discardedCard
     
 }

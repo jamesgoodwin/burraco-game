@@ -1,10 +1,11 @@
+import com.sun.org.apache.xpath.internal.operations.Bool
 import meld.Burraco
 import meld.Burraco.*
 import meld.Meld
+import meld.MeldMove
 import player.Player
 import player.PlayerTurn
-import player.PlayerTurnState.MELDING
-import player.PlayerTurnState.PICKING
+import player.PlayerTurnState.*
 import java.lang.RuntimeException
 
 data class State(
@@ -19,8 +20,7 @@ data class State(
         state.meldMovesFinder,
         state.playersTurn,
         state.stock,
-        state.discard.toMutableList()) {
-    }
+        state.discard.toMutableList())
 
     var finished: Boolean = false
     var playerTurnState: PlayerTurn = StateBasedPlayerTurn(this)
@@ -41,12 +41,15 @@ data class State(
         return melds[player] ?: mutableListOf(mutableListOf())
     }
 
+    fun roundOver(): Boolean = playerTurnState.roundOver()
+
     public override fun clone(): State {
         val clone = State(state = this)
 
         clone.playersTurn = this.playersTurn
         clone.stock = ArrayDeque()
         clone.stock.addAll(this.stock)
+        assert(clone.totalCardCount() <= 108)
 
         clone.pots.forEach {
             val cards = this.pots[it.key]
@@ -55,6 +58,8 @@ data class State(
             }
         }
 
+        assert(clone.totalCardCount() <= 108)
+
         clone.melds.forEach {
             val melds = this.melds[it.key]
             if (melds != null) {
@@ -62,12 +67,17 @@ data class State(
             }
         }
 
+        assert(clone.totalCardCount() <= 108)
+
         clone.hands.forEach {
+
             val hand = this.hands[it.key]
             if (hand != null) {
                 it.value.addAll(hand.toList())
             }
         }
+
+        assert(clone.totalCardCount() <= 108)
 
         clone.seenCards.forEach {
             val cards = this.seenCards[it.key]
@@ -75,6 +85,8 @@ data class State(
                 it.value.addAll(cards)
             }
         }
+
+        assert(clone.totalCardCount() <= 108)
 
         return clone
     }
@@ -90,37 +102,47 @@ data class State(
         println("T: $totalCards, H: $cardsInHands, M: $cardsInMelds, P:$cardsInPot, S:${stock.size}, D:${discard.size}")
     }
 
-    private fun printPile() {
-        if (discard.isNotEmpty()) {
-            val cards = discard.joinToString(", ")
-            println("Discard pile: $cards")
-        }
+    fun totalCardCount() : Int {
+        val cardsInHands = players.map { hand(it) }.map { it.size }.sumOf { it }
+        val cardsInMelds = players.map { melds(it) }.flatten().map { it.size }.sumOf { it }
+        val cardsInPot = players.mapNotNull { pots[it] }.map { it.size }.sumOf { it }
+
+        return cardsInHands + cardsInMelds + cardsInPot + stock.size + discard.size
     }
 
-    fun printMelds(player: Player) {
+    private fun pileToString(): String {
+        if (discard.isNotEmpty()) {
+            val cards = discard.joinToString(", ")
+            return ("Discard pile: $cards")
+        }
+        return ("Discard pile:[]")
+    }
+
+    fun meldsToString(player: Player): String {
         val melds = melds(player)
         if (melds.isNotEmpty()) {
             val cards = melds.joinToString(" - ") { it.sorted().joinToString(", ") }
-            println("Melds: $cards")
+            return "Melds: $cards"
         }
+        return "Melds: []"
     }
 
-    private fun printHand(player: Player) {
+    private fun handToString(player: Player): String {
         val cards = hand(player).sorted()
         val hand = cards.joinToString(", ")
-        println("Hand: $hand")
+        return ("Hand: $hand")
     }
 
     fun printGameState(player: Player) {
-        printPile()
-        printHand(player)
-        printMelds(player)
-        printPoints(player)
+        println(pileToString())
+        println(handToString(player))
+        println(meldsToString(player))
+        println(pointsToString(player))
     }
 
-    private fun printPoints(player: Player) {
+    private fun pointsToString(player: Player): String {
         val points = points(player)
-        println("Points: $points")
+        return "Points: $points"
     }
 
     fun hasBurraco(player: Player): Boolean {
@@ -169,10 +191,17 @@ data class State(
             PICKING -> listOf(TakePileMove(), TakeCardMove())
             MELDING -> {
                 val hand = hand(playersTurn)
-                val melds = melds(playersTurn).map { cards -> Meld(cards) }
-                meldMovesFinder.getAllMoves(hand, this, melds)
+                val allMoves : MutableList<Move> = getMeldMoves(hand).toMutableList()
+                allMoves.addAll(hand.map { DiscardMove(it) })
+                allMoves
             }
+            FINISHED -> emptyList()
         }
+    }
+
+    private fun getMeldMoves(hand: MutableList<PlayingCard>): List<MeldMove> {
+        val melds = melds(playersTurn).map { cards -> Meld(cards) }
+        return meldMovesFinder.getAllMoves(hand, this, melds)
     }
 
     private fun advancePlayer() {
@@ -211,22 +240,30 @@ data class State(
 
         // loop through each player
         clone.players.forEach { player ->
-            val hand = clone.hands[player]
+            val hand = this.hands[player]
             val handSize = hand?.size ?: 0
             hand?.clear()
             hand?.addAll(visibleCards[player] ?: emptyList())
             val remaining = handSize - (hand?.size ?: 0)
-            hand?.addAll(hiddenCards.take(remaining))
+            val cardsToBeAdded = hiddenCards.take(remaining)
+            cardsToBeAdded.forEach { hiddenCards.remove(it) }
+            hand?.addAll(cardsToBeAdded)
         }
 
         clone.pots.mapValues { (_, cards) ->
             val count = cards.size
             cards.clear()
-            cards.addAll(hiddenCards.take(count))
+            val cardsToBeAdded = hiddenCards.take(count)
+            cardsToBeAdded.forEach { hiddenCards.remove(it) }
+            cards.addAll(cardsToBeAdded)
         }
+
+        assert(clone.totalCardCount() <= 108)
 
         clone.stock.clear()
         clone.stock = hiddenCards
+
+        assert(clone.totalCardCount() <= 108)
 
         return clone
     }
@@ -294,4 +331,11 @@ data class State(
         return false
     }
 
+    override fun toString(): String {
+        return super.toString()
+    }
+
+    fun getWinResult(): Float {
+        return 0f
+    }
 }

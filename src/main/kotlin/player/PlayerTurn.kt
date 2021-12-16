@@ -15,5 +15,6 @@ interface PlayerTurn {
     fun meld(cards: List<PlayingCard>): Boolean
     fun meld(move: MeldMove): Boolean
     fun getTurnState(): PlayerTurnState
+    fun roundOver(): Boolean
 }
 

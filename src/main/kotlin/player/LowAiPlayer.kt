@@ -17,7 +17,7 @@ class LowAiPlayer(val meldEvaluator: MeldEvaluator) : Player {
             if (melds.isNotEmpty()) {
                 turn.meld(melds.first())
             }
-            state.printMelds(this)
+            println(state.meldsToString(this))
         }
 
         state.hand(this).first().let { card ->

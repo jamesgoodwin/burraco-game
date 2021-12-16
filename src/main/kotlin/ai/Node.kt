@@ -10,7 +10,7 @@ data class Node(
     val children: MutableList<Node> = mutableListOf(),
     val player: Player,
     val moveToPlay: Move? = null,
-    var totalScore: Int = 0,
+    var totalScore: Long = 0,
     var visits: Int = 0,
     var considerations: Int = 1,
 ) {
@@ -31,7 +31,6 @@ data class Node(
         for (child in children) {
             if (possibleMoves.contains(child.moveToPlay)) {
                 val currentScore = calculateUCTScore(child, explorationFactor)
-
                 if (currentScore > selectionScore) {
                     selection = child
                     selectionScore = currentScore
@@ -51,5 +50,10 @@ data class Node(
         val newNode = Node(parent = this, player = player, moveToPlay = move)
         children.add(newNode)
         return newNode
+    }
+
+    fun update(winner: Player, score: Long) {
+        visits++
+        totalScore += if (winner.name() == player.name()) score else 1 - score
     }
 }

@@ -16,7 +16,7 @@ class BurracoGame(
     fun runGame() {
         while (!state.finished) {
             val name = state.playersTurn.name()
-            println("--- player.Player ($name) turn ---")
+            println("--- Player ($name) turn ---")
             state.printGameState(state.playersTurn)
             state.takeNextTurn()
         }

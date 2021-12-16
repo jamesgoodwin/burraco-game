@@ -1,5 +1,5 @@
 package player
 
 enum class PlayerTurnState {
-    PICKING, MELDING
+    PICKING, MELDING, FINISHED
 }
