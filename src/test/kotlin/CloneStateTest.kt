@@ -32,6 +32,16 @@ internal class CloneStateTest {
     }
 
     @Test
+    fun shouldClonePlayerTurnState() {
+        val state = State(players, meldMovesFinder)
+        val clone = state.clone()
+
+        assertEquals(state.playerTurnState, clone.playerTurnState)
+        assertEquals(state.playerTurnState, clone.playerTurnState)
+        assertNotSame(state.playerTurnState, clone.playerTurnState)
+    }
+
+    @Test
     fun shouldCloneDiscardedCards() {
         val state = State(players, meldMovesFinder)
         state.discard.add(PlayingCard(JOKER))

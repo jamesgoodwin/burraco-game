@@ -1,4 +1,4 @@
-interface Move {
-    fun performMove(state: State): Boolean
+abstract class Move {
+    abstract fun performMove(state: State): Boolean
 }
 

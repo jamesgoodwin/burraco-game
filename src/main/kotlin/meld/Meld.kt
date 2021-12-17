@@ -16,7 +16,6 @@ data class Meld(val cards: List<PlayingCard>) {
     private val regularCards = cards.filterNot(wildcard).sorted()
     private val wildcards = cards.filter(wildcard)
 
-
     init {
         var (meldSuit, meldValue: PlayingCard.Value?) = checkSuitAndValue()
         // cannot be a combination in scenario of two wildcards so null it, i.e. Two and a Joker

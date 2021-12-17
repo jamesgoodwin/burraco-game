@@ -3,7 +3,7 @@ package player
 import meld.MeldEvaluator
 import State
 
-class LowAiPlayer(val meldEvaluator: MeldEvaluator) : Player {
+class LowAiPlayer(private val meldEvaluator: MeldEvaluator) : Player {
 
     override fun takeTurn(state: State, turn: PlayerTurn) {
         if(state.discard.size > 3) {
@@ -24,6 +24,7 @@ class LowAiPlayer(val meldEvaluator: MeldEvaluator) : Player {
             turn.discard(card)
         }
 
+        state.advancePlayer()
         // given a list of cards
         // return a collection with the highest scoring hand
         // if other hands available and not intersecting, return them too

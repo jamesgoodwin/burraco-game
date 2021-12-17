@@ -9,11 +9,14 @@ class HumanPlayer(private val name: String) : Player {
     private val meldMovesFinder = MeldMovesFinder()
 
     override fun takeTurn(state: State, turn: PlayerTurn) {
+        state.printTotalCardCount()
+
         takeCardInput(turn)
 
         state.printGameState(this)
 
         placeCardInput(state, turn)
+        state.printTotalCardCount()
     }
 
     override fun name(): String = name
@@ -36,8 +39,6 @@ class HumanPlayer(private val name: String) : Player {
 
     private fun placeCardInput(state: State, turn: PlayerTurn) {
         val handState = state.hand(this)
-        val meldsState = state.melds(this).map { cards -> Meld(cards) }
-
         val moves = meldMovesFinder.getAllMoves(handState, state, emptyList())
 
         println("Please choose an option:")
@@ -80,12 +81,10 @@ class HumanPlayer(private val name: String) : Player {
         println("Enter a card to discard")
         readLine()?.let { index ->
             if (index.toInt() > 0) {
-                val card = state.hand(this)?.sorted()?.get(index.toInt() - 1)
-                if (card != null) {
-                    turn.discard(card)
-                }
+                val card = state.hand(this).sorted().get(index.toInt() - 1)
+                turn.discard(card)
+                state.advancePlayer()
             }
         }
     }
-
 }

@@ -56,4 +56,10 @@ data class Node(
         visits++
         totalScore += if (winner.name() == player.name()) score else 1 - score
     }
+
+    override fun toString(): String {
+        return "totalScore: $totalScore, moveToPlay: $moveToPlay, " +
+                "children(size): ${children.size}, player: $player, visits: $visits, " +
+                "considerations: $considerations"
+    }
 }

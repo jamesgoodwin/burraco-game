@@ -5,6 +5,7 @@ import PlayingCard.Value.*
 import meld.Meld
 import meld.MeldMovesFinder
 import player.HumanPlayer
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 internal class MeldMovesFinderTest {
@@ -56,7 +57,7 @@ internal class MeldMovesFinderTest {
 
         //new melds expected Q,2,A - H, 5,5,2, 3,4,2, 8,8,2, 8,9,2,
         // also adding 2 to existing melds KKK and 666
-        assertTrue(moves.size == 5)
+        assertEquals(5, moves.size)
     }
 
 }

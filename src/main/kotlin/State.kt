@@ -1,10 +1,8 @@
-import com.sun.org.apache.xpath.internal.operations.Bool
 import meld.Burraco
 import meld.Burraco.*
 import meld.Meld
 import meld.MeldMove
 import player.Player
-import player.PlayerTurn
 import player.PlayerTurnState.*
 import java.lang.RuntimeException
 
@@ -23,7 +21,7 @@ data class State(
         state.discard.toMutableList())
 
     var finished: Boolean = false
-    var playerTurnState: PlayerTurn = StateBasedPlayerTurn(this)
+    var playerTurnState: StateBasedPlayerTurn = StateBasedPlayerTurn(this)
 
     val melds: Map<Player, MutableList<MutableList<PlayingCard>>> = players.associateWith { mutableListOf() }
 
@@ -45,11 +43,10 @@ data class State(
 
     public override fun clone(): State {
         val clone = State(state = this)
-
         clone.playersTurn = this.playersTurn
+        clone.playerTurnState = this.playerTurnState.clone(clone)
         clone.stock = ArrayDeque()
         clone.stock.addAll(this.stock)
-        assert(clone.totalCardCount() <= 108)
 
         clone.pots.forEach {
             val cards = this.pots[it.key]
@@ -58,16 +55,12 @@ data class State(
             }
         }
 
-        assert(clone.totalCardCount() <= 108)
-
         clone.melds.forEach {
             val melds = this.melds[it.key]
             if (melds != null) {
                 it.value.addAll(melds.toList())
             }
         }
-
-        assert(clone.totalCardCount() <= 108)
 
         clone.hands.forEach {
 
@@ -77,8 +70,6 @@ data class State(
             }
         }
 
-        assert(clone.totalCardCount() <= 108)
-
         clone.seenCards.forEach {
             val cards = this.seenCards[it.key]
             if (cards != null) {
@@ -87,22 +78,19 @@ data class State(
         }
 
         assert(clone.totalCardCount() <= 108)
-
         return clone
     }
 
     fun printTotalCardCount() {
         val cardsInHands = players.map { hand(it) }.map { it.size }.sumOf { it }
-
         val cardsInMelds = players.map { melds(it) }.flatten().map { it.size }.sumOf { it }
-
         val cardsInPot = players.mapNotNull { pots[it] }.map { it.size }.sumOf { it }
-
         val totalCards = cardsInHands + cardsInMelds + cardsInPot + stock.size + discard.size
+
         println("T: $totalCards, H: $cardsInHands, M: $cardsInMelds, P:$cardsInPot, S:${stock.size}, D:${discard.size}")
     }
 
-    fun totalCardCount() : Int {
+    private fun totalCardCount() : Int {
         val cardsInHands = players.map { hand(it) }.map { it.size }.sumOf { it }
         val cardsInMelds = players.map { melds(it) }.flatten().map { it.size }.sumOf { it }
         val cardsInPot = players.mapNotNull { pots[it] }.map { it.size }.sumOf { it }
@@ -204,12 +192,13 @@ data class State(
         return meldMovesFinder.getAllMoves(hand, this, melds)
     }
 
-    private fun advancePlayer() {
+    internal fun advancePlayer() {
         playersTurn = when (playersTurn) {
             players[0] -> players[1]
             players[1] -> players[0]
             else -> throw RuntimeException("Unknown player")
         }
+        playerTurnState = StateBasedPlayerTurn(this)
     }
 
     fun doMove(moveToPlay: Move?, ai: Boolean) {
@@ -223,7 +212,6 @@ data class State(
         if (playerClosed(playersTurn)) {
             finished = true
         }
-        advancePlayer()
         // todo - finish the game if less cards in the deck than full player rounds
     }
 
@@ -298,6 +286,7 @@ data class State(
     }
 
     fun takeCard(player: Player) {
+        print("Take card - remaining ${stock.size}")
         hands[player]?.add(stock.removeLast())
     }
 
@@ -335,7 +324,4 @@ data class State(
         return super.toString()
     }
 
-    fun getWinResult(): Float {
-        return 0f
-    }
 }

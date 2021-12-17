@@ -24,11 +24,10 @@ class ISMCTS(
 
             // 1. Clone and determine the state of the game (randomize information unknown to the AI)
             currentState = rootState.cloneAndRandomiseState()
-
             possibleMoves = currentState.getAllPossibleMoves()
 
             selectChildISMCTS()
-            expandTreeISMCTS()
+            expandTreeISMCTS() // change currentNode from root to child
             simulateISMCTS()
             backPropagateISMCTS()
         }
@@ -47,13 +46,14 @@ class ISMCTS(
                 selectChildISMCTS()
                 expandTreeISMCTS()
             } else {
-                currentNode?.addChild(randomMove, currentPlayer)
+                currentNode = currentNode?.addChild(randomMove, currentPlayer)
                 currentState.doMove(randomMove, false)
             }
         }
     }
 
     private fun selectChildISMCTS() {
+        // can go in infinite loop if selectChild returns null
         while (possibleMoves.isNotEmpty()
             && !currentState.finished
             && currentNode?.getUntriedMoves(possibleMoves)?.isNotEmpty() == true

@@ -1,11 +1,12 @@
 import meld.HandEvaluator
 import meld.MeldMovesFinder
 import player.HumanPlayer
+import player.IsmctsPlayer
 import player.LowAiPlayer
 
 class BurracoGame(
     var state: State = State(
-        players = listOf(HumanPlayer("1"), LowAiPlayer(HandEvaluator())),
+        players = listOf(HumanPlayer("1"), IsmctsPlayer()),
         meldMovesFinder = MeldMovesFinder()),
 ) {
 

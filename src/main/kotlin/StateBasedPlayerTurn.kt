@@ -5,19 +5,25 @@ import player.PlayerTurn
 import player.PlayerTurnState
 import player.PlayerTurnState.*
 
-class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
-
-    var takenCard: Boolean = false
-    var discardedCard: Boolean = false
+class StateBasedPlayerTurn(
+    private val state: State,
+    var takenCard: Boolean = false,
+    var discardedCard: Boolean = false,
+) : PlayerTurn {
 
     // todo - check all mutations to state and verify with unit tests for all cases
     override fun performMove(move: Move) {
         val result = move.performMove(state)
-        when(move) {
-            is TakeCardMove, is TakePileMove -> if(result) takenCard = true
-            is DiscardMove -> if(result) discardedCard = true
+        when (move) {
+            is TakeCardMove, is TakePileMove -> if (result) takenCard = true
+            is DiscardMove -> {
+                if (result) discardedCard = true
+            }
         }
+    }
 
+    fun clone(clonedState: State): StateBasedPlayerTurn {
+        return StateBasedPlayerTurn(clonedState, takenCard, discardedCard)
     }
 
     @Deprecated("Use Move objects instead")
@@ -93,8 +99,8 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
     }
 
     override fun getTurnState(): PlayerTurnState {
-        return if(!takenCard) PICKING
-        else if(takenCard && !discardedCard) MELDING
+        return if (!takenCard) PICKING
+        else if (takenCard && !discardedCard) MELDING
         else FINISHED
     }
 
@@ -103,5 +109,11 @@ class StateBasedPlayerTurn(private val state: State) : PlayerTurn {
     private fun playerHasTakenPot() = state.pots[state.playersTurn]?.isEmpty() == true
 
     override fun roundOver() = takenCard && discardedCard
-    
+
+    override fun equals(other: Any?): Boolean {
+        if (other is StateBasedPlayerTurn) {
+            return this.takenCard == other.takenCard && this.discardedCard == other.discardedCard
+        }
+        return super.equals(other)
+    }
 }
