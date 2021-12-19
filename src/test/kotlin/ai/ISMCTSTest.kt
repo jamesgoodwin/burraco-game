@@ -5,6 +5,8 @@ import State
 import meld.MeldMovesFinder
 import org.junit.Test
 import player.IsmctsPlayer
+import kotlin.test.assertNotNull
+
 internal class ISMCTSTest {
 
     private val players = listOf(IsmctsPlayer(), IsmctsPlayer())
@@ -15,7 +17,12 @@ internal class ISMCTSTest {
         // initialise game
         BurracoGame(state)
 
-        state.takeNextTurn()
+        val takeMove = ISMCTS(state, 1000).run()
+        assertNotNull(takeMove)
+        state.doMove(takeMove)
+
+        val nextMove = ISMCTS(state, 1000).run()
+        assertNotNull(nextMove)
     }
 
 }

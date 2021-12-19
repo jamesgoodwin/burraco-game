@@ -10,7 +10,7 @@ class ISMCTS(
 
     private val rootNode: Node = Node(player = rootState.playersTurn)
 
-    private var currentNode : Node? = rootNode
+    private var currentNode: Node? = rootNode
     private lateinit var currentState: State
     private lateinit var possibleMoves: List<Move>
 
@@ -42,26 +42,26 @@ class ISMCTS(
             val randomMove = untriedMoves.random()
             val currentPlayer = currentState.playersTurn
             if (this.possibleMoves.size == 1) {
-                currentState.doMove(randomMove, false)
+                currentState.doMove(randomMove)
                 selectChildISMCTS()
                 expandTreeISMCTS()
             } else {
                 currentNode = currentNode?.addChild(randomMove, currentPlayer)
-                currentState.doMove(randomMove, false)
+                currentState.doMove(randomMove)
             }
         }
     }
 
     private fun selectChildISMCTS() {
         // can go in infinite loop if selectChild returns null
-        while (possibleMoves.isNotEmpty()
-            && !currentState.finished
-            && currentNode?.getUntriedMoves(possibleMoves)?.isNotEmpty() == true
-            && currentNode?.children?.isNotEmpty() == true) {
+        while ((possibleMoves.isNotEmpty()
+                    && !this.currentState.roundOver())
+            && currentNode?.getUntriedMoves(this.possibleMoves)?.isEmpty() == true
+        ) { // While every move option has been explored and the game hasn't ended
             val child = currentNode?.selectChild(possibleMoves, EXPLORATION_FACTOR)
             if (child != null) {
                 currentNode = child
-                currentState.doMove(currentNode?.moveToPlay, true)
+                currentState.doMove(currentNode?.moveToPlay)
             }
             possibleMoves = currentState.getAllPossibleMoves()
         }
@@ -73,16 +73,16 @@ class ISMCTS(
 
         while (possibleMoves.isNotEmpty() && !currentState.roundOver()) {
             // Do the random move and update possible moves
-            currentState.doMove(possibleMoves.random(), false)
+            currentState.doMove(possibleMoves.random())
             possibleMoves = currentState.getAllPossibleMoves()
         }
     }
 
     private fun backPropagateISMCTS() {
-        val winResult = currentState.points(currentState.playersTurn)
+        val score = currentState.points(currentState.playersTurn)
 
         while (currentNode != null) {
-            currentNode?.update(currentState.playersTurn, winResult.toLong())
+            currentNode?.update(currentState.playersTurn, score.toLong())
             currentNode = currentNode?.parent
         }
     }

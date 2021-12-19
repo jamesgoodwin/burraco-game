@@ -90,7 +90,7 @@ data class State(
         println("T: $totalCards, H: $cardsInHands, M: $cardsInMelds, P:$cardsInPot, S:${stock.size}, D:${discard.size}")
     }
 
-    private fun totalCardCount() : Int {
+    private fun totalCardCount(): Int {
         val cardsInHands = players.map { hand(it) }.map { it.size }.sumOf { it }
         val cardsInMelds = players.map { melds(it) }.flatten().map { it.size }.sumOf { it }
         val cardsInPot = players.mapNotNull { pots[it] }.map { it.size }.sumOf { it }
@@ -145,14 +145,42 @@ data class State(
         val burracoPoints = getBurracoPoints(player)
         val meldCardPoints = melds[player]?.sumOf { it.sumOf { card -> card.value.points } } ?: 0
 
-        val handCardPoints = hands[player]?.sumOf { it.value.points } ?: 0
-        val takenPot = pots[player]?.isEmpty()
-        val takenPotPenalty = if (takenPot == true) 0 else 100
+//        val handCardPoints = hands[player]?.sumOf { it.value.points } ?: 0
+//        val takenPot = pots[player]?.isEmpty()
+//        val takenPotPenalty = if (takenPot == true) 0 else 100
 
         val playerHasWon = finished && playerClosed(player)
         val winningPoints = if (playerHasWon) 100 else 0
 
-        return ((burracoPoints + meldCardPoints + winningPoints) - handCardPoints) - takenPotPenalty
+        return burracoPoints + meldCardPoints + winningPoints
+    }
+
+    fun ismctsScore(player: Player): Float {
+        val burracos = burracos(player)
+        var score = 0f
+
+        if (burracos.isNotEmpty()) {
+            score += 0.3f
+        }
+
+        if (pots[player]?.isEmpty() == true) {
+            score += 0.4f
+        }
+
+        // 0.3 left to win
+        val handCardsSize = hand(player).size
+
+        score += when {
+            handCardsSize >= 10 -> 0.05f
+            handCardsSize in 7..10 -> 0.1f
+            handCardsSize in 5..7 -> 0.15f
+            handCardsSize in 3..5 -> 0.2f
+            handCardsSize in 2..3 -> 0.25f
+            handCardsSize == 1 -> 0.3f
+            else -> 0f
+        }
+
+        return score
     }
 
     private fun getBurracoPoints(player: Player): Int {
@@ -179,7 +207,7 @@ data class State(
             PICKING -> listOf(TakePileMove(), TakeCardMove())
             MELDING -> {
                 val hand = hand(playersTurn)
-                val allMoves : MutableList<Move> = getMeldMoves(hand).toMutableList()
+                val allMoves: MutableList<Move> = getMeldMoves(hand).toMutableList()
                 allMoves.addAll(hand.map { DiscardMove(it) })
                 allMoves
             }
@@ -201,7 +229,7 @@ data class State(
         playerTurnState = StateBasedPlayerTurn(this)
     }
 
-    fun doMove(moveToPlay: Move?, ai: Boolean) {
+    fun doMove(moveToPlay: Move?) {
         if (moveToPlay != null) {
             playerTurnState.performMove(moveToPlay)
         }
@@ -286,7 +314,7 @@ data class State(
     }
 
     fun takeCard(player: Player) {
-        print("Take card - remaining ${stock.size}")
+//        print("Take card - remaining ${stock.size}")
         hands[player]?.add(stock.removeLast())
     }
 

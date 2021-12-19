@@ -6,9 +6,8 @@ class TakePotMove : Move() {
     }
 
     override fun equals(other: Any?): Boolean {
-        if(other is TakePotMove) {
-            return true
-        }
+        if(other is TakePotMove) return true
+
         return super.equals(other)
     }
 
