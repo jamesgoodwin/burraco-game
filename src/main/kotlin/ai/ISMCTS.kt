@@ -2,6 +2,7 @@ package ai
 
 import Move
 import State
+import kotlin.system.measureTimeMillis
 
 class ISMCTS(
     private val rootState: State,
@@ -18,6 +19,12 @@ class ISMCTS(
         const val EXPLORATION_FACTOR: Double = 0.7
     }
 
+    var selectChildTime = 0L
+    var expandTreeTime = 0L
+    var simulateTime = 0L
+    var backPropagateTime = 0L
+    var getMovesTime = 0L
+
     fun run(): Move? {
         for (i in 0 until limit) {
             currentNode = rootNode
@@ -26,11 +33,15 @@ class ISMCTS(
             currentState = rootState.cloneAndRandomiseState()
             possibleMoves = currentState.getAllPossibleMoves()
 
-            selectChildISMCTS()
-            expandTreeISMCTS() // change currentNode from root to child
-            simulateISMCTS()
-            backPropagateISMCTS()
+            selectChildTime += measureTimeMillis { selectChildISMCTS() }
+            expandTreeTime += measureTimeMillis { expandTreeISMCTS() } // change currentNode from root to child
+            simulateTime += measureTimeMillis { simulateISMCTS() }
+            backPropagateTime += measureTimeMillis { backPropagateISMCTS() }
         }
+
+        println("TIME: selectChildTime: $selectChildTime ms, expandTreeTime: $expandTreeTime ms, " +
+                "simulateTime: $simulateTime ms, backPropagateTime: $backPropagateTime ms," +
+                "getMovesTime: $getMovesTime ms")
 
         val best = rootNode.children.maxByOrNull { it.visits }
         return best?.moveToPlay
@@ -41,21 +52,13 @@ class ISMCTS(
         if (untriedMoves?.isNotEmpty() == true) {
             val randomMove = untriedMoves.random()
             val currentPlayer = currentState.playersTurn
-            if (this.possibleMoves.size == 1) {
-                currentState.doMove(randomMove)
-                selectChildISMCTS()
-                expandTreeISMCTS()
-            } else {
-                currentNode = currentNode?.addChild(randomMove, currentPlayer)
-                currentState.doMove(randomMove)
-            }
+            currentNode = currentNode?.addChild(randomMove, currentPlayer)
+            currentState.doMove(randomMove)
         }
     }
 
     private fun selectChildISMCTS() {
-        // can go in infinite loop if selectChild returns null
-        while ((possibleMoves.isNotEmpty()
-                    && !this.currentState.roundOver())
+        while ((possibleMoves.isNotEmpty() && !this.currentState.finished)
             && currentNode?.getUntriedMoves(this.possibleMoves)?.isEmpty() == true
         ) { // While every move option has been explored and the game hasn't ended
             val child = currentNode?.selectChild(possibleMoves, EXPLORATION_FACTOR)
@@ -68,21 +71,25 @@ class ISMCTS(
     }
 
     private fun simulateISMCTS() {
-        possibleMoves = currentState.getAllPossibleMoves()
+        getMovesTime += measureTimeMillis { possibleMoves = currentState.getAllPossibleMoves() }
         currentState.playersTurn.name()
 
-        while (possibleMoves.isNotEmpty() && !currentState.roundOver()) {
+        var simulationDepth = 0
+        while (possibleMoves.isNotEmpty() && !currentState.finished) {
             // Do the random move and update possible moves
             currentState.doMove(possibleMoves.random())
-            possibleMoves = currentState.getAllPossibleMoves()
+            if(currentState.roundOver()) currentState.advancePlayer()
+            getMovesTime += measureTimeMillis { possibleMoves = currentState.getAllPossibleMoves() }
+            simulationDepth++
+//            println("Simulation depth: $simulationDepth, player: ${currentState.playersTurn}")
         }
     }
 
     private fun backPropagateISMCTS() {
-        val score = currentState.points(currentState.playersTurn)
+        val score = currentState.ismctsScore(currentState.playersTurn)
 
         while (currentNode != null) {
-            currentNode?.update(currentState.playersTurn, score.toLong())
+            currentNode?.update(currentState.playersTurn, score)
             currentNode = currentNode?.parent
         }
     }

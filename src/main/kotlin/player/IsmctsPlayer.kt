@@ -33,4 +33,8 @@ class IsmctsPlayer : Player {
     override fun name(): String {
         return "ISMCTS Player: $name"
     }
+
+    override fun toString(): String {
+        return name()
+    }
 }

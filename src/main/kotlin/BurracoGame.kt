@@ -1,8 +1,6 @@
-import meld.HandEvaluator
 import meld.MeldMovesFinder
 import player.HumanPlayer
 import player.IsmctsPlayer
-import player.LowAiPlayer
 
 class BurracoGame(
     var state: State = State(
@@ -20,6 +18,9 @@ class BurracoGame(
             println("--- Player ($name) turn ---")
             state.printGameState(state.playersTurn)
             state.takeNextTurn()
+        }
+        state.players.forEach {
+            println("Player ${it.name()} has ${state.points(it)} points")
         }
     }
 

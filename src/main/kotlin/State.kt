@@ -154,29 +154,29 @@ data class State(
         return burracoPoints + meldCardPoints + winningPoints
     }
 
-    fun ismctsScore(player: Player): Float {
+    fun ismctsScore(player: Player): Double {
         val burracos = burracos(player)
-        var score = 0f
+        var score = 0.0
 
         if (burracos.isNotEmpty()) {
-            score += 0.3f
+            score += 0.3
         }
 
         if (pots[player]?.isEmpty() == true) {
-            score += 0.4f
+            score += 0.4
         }
 
         // 0.3 left to win
         val handCardsSize = hand(player).size
 
         score += when {
-            handCardsSize >= 10 -> 0.05f
-            handCardsSize in 7..10 -> 0.1f
-            handCardsSize in 5..7 -> 0.15f
-            handCardsSize in 3..5 -> 0.2f
-            handCardsSize in 2..3 -> 0.25f
-            handCardsSize == 1 -> 0.3f
-            else -> 0f
+            handCardsSize >= 10 -> 0.05
+            handCardsSize in 7..10 -> 0.1
+            handCardsSize in 5..7 -> 0.15
+            handCardsSize in 3..5 -> 0.2
+            handCardsSize in 2..3 -> 0.25
+            handCardsSize == 1 -> 0.3
+            else -> 0.0
         }
 
         return score
@@ -202,6 +202,8 @@ data class State(
     }
 
     fun getAllPossibleMoves(): List<Move> {
+        if(stock.isEmpty()) return emptyList()
+
         return when (playerTurnState.getTurnState()) {
             PICKING -> listOf(TakePileMove(), TakeCardMove())
             MELDING -> {
@@ -215,8 +217,14 @@ data class State(
     }
 
     private fun getMeldMoves(hand: MutableList<PlayingCard>): List<MeldMove> {
-        val melds = melds(playersTurn).map { cards -> Meld(cards) }
+        val melds = melds(playersTurn).map { cards -> getMeldFast(cards) }
         return meldMovesFinder.getAllMoves(hand, this, melds)
+    }
+
+    val getMeldFast = this::getMeldSlow.memoize(5000)
+
+    private fun getMeldSlow(cards: List<PlayingCard>): Meld {
+        return Meld(cards)
     }
 
     internal fun advancePlayer() {

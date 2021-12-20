@@ -11,6 +11,7 @@ version = "0-1-SNAPSHOT"
 
 repositories {
     mavenCentral()
+//    maven { url = uri("https://dl.bintray.com/aballano/maven/") }
 }
 
 publishing {
@@ -24,20 +25,20 @@ publishing {
         }
     }
     repositories {
-        repositories {
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/jamesgoodwin/burraco-game")
-                credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
-                }
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/jamesgoodwin/burraco-game")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
             }
         }
+//        maven { url = uri("https://dl.bintray.com/aballano/maven/") }
     }
 }
 
 dependencies {
+//    compile("mnemonik:mnemonik:2.1.0")
     testImplementation(kotlin("test-junit"))
 }
 

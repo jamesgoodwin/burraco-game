@@ -10,13 +10,14 @@ data class Node(
     val children: MutableList<Node> = mutableListOf(),
     val player: Player,
     val moveToPlay: Move? = null,
-    var totalScore: Long = 0,
+    var totalScore: Double = 0.0,
     var visits: Int = 0,
     var considerations: Int = 1,
 ) {
 
     fun getUntriedMoves(possibleMoves: List<Move>): List<Move> {
         val triedMoves = children.mapNotNull { it.moveToPlay }
+//        assert(possibleMoves.containsAll(triedMoves))
 
         if (triedMoves.isNotEmpty()) {
             return possibleMoves - triedMoves
@@ -42,6 +43,26 @@ data class Node(
         return selection
     }
 
+    fun selectChild2(possibleMoves: List<Move>, explorationFactor: Double): Node? {
+        var selection: Node? = null
+        var selectionScore = -1.0
+
+        for (i in 0 until children.size) {
+            val child: Node = children[i]
+            if (possibleMoves.contains(child.moveToPlay)) {
+                val currentScore = calculateUCTScore(child, explorationFactor)
+                if (currentScore > selectionScore) {
+                    selection = child
+                    selectionScore = currentScore
+                }
+                child.considerations = child.considerations + 1
+            }
+        }
+        return selection
+    }
+
+
+
     private fun calculateUCTScore(node: Node, explorationFactor: Double): Double {
         return (node.totalScore / node.visits) + (explorationFactor * sqrt(ln(node.considerations.toDouble()) / node.visits))
     }
@@ -52,7 +73,7 @@ data class Node(
         return newNode
     }
 
-    fun update(winner: Player, score: Long) {
+    fun update(winner: Player, score: Double) {
         visits++
         totalScore += if (winner.name() == player.name()) score else 1 - score
     }
