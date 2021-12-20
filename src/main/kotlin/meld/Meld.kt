@@ -53,7 +53,7 @@ data class Meld(val cards: List<PlayingCard>) {
 
         val gapIndex = if (cardsBeingOrdered.isNotEmpty()) gapIndex(cardsBeingOrdered) else -1
         var wildCardUsed = false
-        var naturalTwoUsed = false
+        var naturalTwoUsed: Boolean
 
         // 3 .. King
         if (gapIndex > 0 && wildCardsToBeUsed.isNotEmpty()) {

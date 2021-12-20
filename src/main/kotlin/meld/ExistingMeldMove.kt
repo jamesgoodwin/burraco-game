@@ -9,16 +9,17 @@ class ExistingMeldMove(private val meldAttempt: MeldAttempt) : MeldMove() {
     }
 
     override fun equals(other: Any?): Boolean {
-        if(other is ExistingMeldMove) {
-            return this.meldAttempt == other.meldAttempt
-        }
-        return super.equals(other)
+        return this.toString() == other.toString()
     }
 
     override fun toString(): String {
         val handCardsUsed = meldAttempt.handCardsUsed.joinToString(",")
         val existingMeld = meldAttempt.existingMeld.joinToString(",")
         return "Add $handCardsUsed to existing meld: $existingMeld"
+    }
+
+    override fun hashCode(): Int {
+        return meldAttempt.hashCode()
     }
 
 }

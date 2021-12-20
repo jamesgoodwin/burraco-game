@@ -59,7 +59,7 @@ class HumanPlayer(private val name: String) : Player {
                         println("${index + 1}. $move")
                     }
                     readLine()?.let { meldIndex ->
-                        val move = moves[meldIndex.toInt() - 1]
+                        val move = moves.toList()[meldIndex.toInt() - 1]
                         if (turn.meld(move)) {
                             state.printGameState(this)
                             placeCardInput(state, turn)

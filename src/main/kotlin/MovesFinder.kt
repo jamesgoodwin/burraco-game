@@ -3,5 +3,5 @@ import meld.MeldMove
 
 interface MovesFinder {
 
-    fun getAllMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): List<MeldMove>
+    fun getAllMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): Set<MeldMove>
 }

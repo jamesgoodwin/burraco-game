@@ -216,7 +216,7 @@ data class State(
         }
     }
 
-    private fun getMeldMoves(hand: MutableList<PlayingCard>): List<MeldMove> {
+    private fun getMeldMoves(hand: MutableList<PlayingCard>): Set<MeldMove> {
         val melds = melds(playersTurn).map { cards -> getMeldFast(cards) }
         return meldMovesFinder.getAllMoves(hand, this, melds)
     }

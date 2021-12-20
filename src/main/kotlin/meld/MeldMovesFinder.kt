@@ -11,12 +11,14 @@ class MeldMovesFinder : MovesFinder {
 
     val getNewSequenceMeldMovesCached = ::getNewSequenceMeldMovesSlow.memoize(5000)
     val getNewCombinationMeldMovesCached = ::getNewCombinationMeldMovesSlow.memoize(5000)
+    val getMeldToExistingSequenceMovesCached = ::getMeldToExistingSequenceMovesSlow.memoize(5000)
+    val getMeldToExistingCombinationMovesCached = ::getMeldToExistingCombinationMovesSlow.memoize(5000)
 
-    override fun getAllMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): List<MeldMove> {
+    override fun getAllMoves(hand: List<PlayingCard>, state: State, melds: List<Meld>): Set<MeldMove> {
         val handBySuit = hand.groupBy { it.suit }
         val handByValue = hand.groupBy { it.value }
         val wildcards = hand.filter { it.wildcard }
-        val allMoves = mutableListOf<MeldMove>()
+        val allMoves = mutableSetOf<MeldMove>()
 
         allMoves.let {
             it.addAll(getNewSequenceMeldMoves(handBySuit, wildcards))
@@ -28,11 +30,12 @@ class MeldMovesFinder : MovesFinder {
         return allMoves
     }
 
-    private fun getNewCombinationMeldMovesSlow(cards: List<PlayingCard>, wildcards: List<PlayingCard>): List<MeldMove> {
+    private fun getNewCombinationMeldMovesSlow(cards: List<PlayingCard>, wildcards: List<PlayingCard>): Set<MeldMove> {
         val allCombinations: MutableList<List<PlayingCard>> = mutableListOf()
         if (cards.size >= 3) {
             allCombinations.add(cards)
         }
+
         if (cards.size >= 2 && wildcards.isNotEmpty()) {
             wildcards.forEach { wildcard ->
                 val cardsUsed = cards.toMutableList()
@@ -48,39 +51,37 @@ class MeldMovesFinder : MovesFinder {
             .filter { Meld(it.handCardsUsed).valid }
             .map {
                 NewMeldMove(Meld(it.handCardsUsed))
-            }.toList()
+            }.toSet()
     }
 
-    fun getNewCombinationMeldMoves(handByValue: Map<PlayingCard.Value, List<PlayingCard>>, wildcards: List<PlayingCard>, ): List<MeldMove> {
+    fun getNewCombinationMeldMoves(
+        handByValue: Map<PlayingCard.Value, List<PlayingCard>>,
+        wildcards: List<PlayingCard>,
+    ): List<MeldMove> {
         return handByValue.map { handCards -> getNewCombinationMeldMovesCached(handCards.value, wildcards) }.flatten()
     }
 
-    private fun getMeldToExistingCombinationMoves(
-        handByValue: Map<PlayingCard.Value, List<PlayingCard>>,
+    private fun getMeldToExistingCombinationMovesSlow(
+        cards: List<PlayingCard>?,
         wildcards: List<PlayingCard>,
         melds: List<Meld>,
     ): List<MeldMove> {
-        val meldsByValue = melds.groupBy { it.value }
+        val allCombinations = mutableListOf<Triple<Int, List<PlayingCard>, List<PlayingCard>>>()
+        melds.forEach { meld ->
+            val index = melds.indexOf(meld)
 
-        return meldsByValue.map { meldCards ->
-            val allCombinations = mutableListOf<Triple<Int, List<PlayingCard>, List<PlayingCard>>>()
+            if (cards != null) {
+                allCombinations.add(Triple(index, cards, meld.cards))
+            }
 
-            meldCards.value.forEach { meld ->
-                val index = melds.indexOf(meld)
-
-                val handMatchingMeld = handByValue[meldCards.key]
-                if (handMatchingMeld != null) {
-                    allCombinations.add(Triple(index, handMatchingMeld, meld.cards))
-                }
-
-                if (wildcards.isNotEmpty()) {
-                    wildcards.forEach { wildcard ->
-                        allCombinations.add(Triple(index, listOf(wildcard), meld.cards))
-                    }
+            if (wildcards.isNotEmpty()) {
+                wildcards.forEach { wildcard ->
+                    allCombinations.add(Triple(index, listOf(wildcard), meld.cards))
                 }
             }
-            allCombinations
-        }.flatten()
+        }
+
+        return allCombinations
             .map {
                 MeldAttempt(it.first, it.second, it.third)
             }
@@ -88,20 +89,71 @@ class MeldMovesFinder : MovesFinder {
             .map {
                 ExistingMeldMove(it)
             }.toList()
-            .distinctBy { }
+            .distinctBy { it.toString() }
+    }
+
+    private fun getMeldToExistingCombinationMoves(
+        handByValue: Map<PlayingCard.Value, List<PlayingCard>>,
+        wildcards: List<PlayingCard>,
+        melds: List<Meld>,
+    ): List<MeldMove> {
+        return melds.groupBy { it.value }.map { meldsByValue -> getMeldToExistingCombinationMovesCached(handByValue[meldsByValue.key], wildcards, meldsByValue.value) }.flatten()
+    }
+
+    private fun getMeldToExistingSequenceMovesSlow(
+        handCards: List<PlayingCard>?,
+        wildcards: List<PlayingCard>,
+        melds: List<Meld>,
+    ): Set<MeldMove> {
+        val allCombinations = mutableListOf<Triple<Int, List<PlayingCard>, List<PlayingCard>>>()
+        melds.forEach { meld ->
+            val index = melds.indexOf(meld)
+
+            if (handCards != null) {
+                allCombinations.add(Triple(index, handCards, meld.cards))
+            }
+
+            if (wildcards.isNotEmpty()) {
+                wildcards.forEach { wildcard ->
+                    allCombinations.add(Triple(index, listOf(wildcard), meld.cards))
+                }
+            }
+        }
+
+        return allCombinations
+            .map {
+                createWindows(it, wildcards)
+            }
+            .flatten()
+            .filter { Meld(it.meldCombo).valid }
+            .map {
+                ExistingMeldMove(it)
+            }.toSet()
+    }
+
+    fun getMeldToExistingSequenceMoves(
+        handBySuit: Map<PlayingCard.Suit?, List<PlayingCard>>,
+        wildcards: List<PlayingCard>,
+        melds: List<Meld>,
+    ): Set<MeldMove> {
+        val meldsBySuit = melds.groupBy { it.suit }
+        return meldsBySuit.map { meldCards ->
+            getMeldToExistingSequenceMovesCached(handBySuit[meldCards.key], wildcards, meldCards.value)
+        }.flatten().distinctBy { it.toString() }.toSet()
     }
 
     fun getNewSequenceMeldMoves(
         handBySuit: Map<PlayingCard.Suit?, List<PlayingCard>>,
         wildcards: List<PlayingCard>,
-    ): List<MeldMove> {
+    ): Set<MeldMove> {
         return handBySuit.map { handCards -> getNewSequenceMeldMovesCached(handCards.value, wildcards) }.flatten()
+            .toSet()
     }
 
     private fun getNewSequenceMeldMovesSlow(
         cards: List<PlayingCard>,
         wildcards: List<PlayingCard>,
-    ): List<NewMeldMove> {
+    ): Set<NewMeldMove> {
         val allCombinations: MutableList<List<PlayingCard>> = mutableListOf()
         // check for new melds
         if (cards.size >= 2) {
@@ -114,44 +166,7 @@ class MeldMovesFinder : MovesFinder {
             .filter { Meld(it.handCardsUsed).valid }
             .map {
                 NewMeldMove(Meld(it.handCardsUsed))
-            }.toList()
-    }
-
-    fun getMeldToExistingSequenceMoves(
-        handBySuit: Map<PlayingCard.Suit?, List<PlayingCard>>,
-        wildcards: List<PlayingCard>,
-        melds: List<Meld>,
-    ): List<MeldMove> {
-        val meldsBySuit = melds.groupBy { it.suit }
-
-        return meldsBySuit.map { meldCards ->
-            val allCombinations = mutableListOf<Triple<Int, List<PlayingCard>, List<PlayingCard>>>()
-
-            meldCards.value.forEach { meld ->
-                val index = melds.indexOf(meld)
-
-                val handMatchingMeld = handBySuit[meldCards.key]
-                if (handMatchingMeld != null) {
-                    allCombinations.add(Triple(index, handMatchingMeld, meld.cards))
-                }
-
-                if (wildcards.isNotEmpty()) {
-                    wildcards.forEach { wildcard ->
-                        allCombinations.add(Triple(index, listOf(wildcard), meld.cards))
-                    }
-                }
-            }
-            allCombinations
-        }.flatten()
-            .map {
-                createWindows(it, wildcards)
-            }
-            .flatten()
-            .filter { Meld(it.meldCombo).valid }
-            .map {
-                ExistingMeldMove(it)
-            }.toList()
-            .distinctBy { it.toString() }
+            }.toSet()
     }
 
     private fun createWindows(
