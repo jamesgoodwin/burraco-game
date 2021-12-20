@@ -58,12 +58,11 @@ data class State(
         clone.melds.forEach {
             val melds = this.melds[it.key]
             if (melds != null) {
-                it.value.addAll(melds.toList())
+                it.value.addAll(melds.toList().map { cards -> cards.toMutableList() })
             }
         }
 
         clone.hands.forEach {
-
             val hand = this.hands[it.key]
             if (hand != null) {
                 it.value.addAll(hand.toList())

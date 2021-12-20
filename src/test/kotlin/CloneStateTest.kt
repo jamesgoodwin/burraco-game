@@ -71,6 +71,9 @@ internal class CloneStateTest {
         val clone = state.clone()
         assertEquals(state.melds, clone.melds)
         assertNotSame(state.melds, clone.melds)
+
+        // ensure deep copy of list of lists
+        assertNotSame(state.melds.values.first().first(), clone.melds.values.first().first())
     }
 
     @Test
